@@ -1,0 +1,445 @@
+
+### Main Menu ###
+
+Smelting_Menu:
+  type: Inventory
+  inventory: HOPPER
+  title: <&6><&l>Smelting
+  slots:
+  - "[i@Iron_Ingot_Icon] [i@Gold_Ingot_Icon] [] [] []"
+
+Smelting_Menu_Handler:
+  type: world
+  events:
+    on server start:
+    - note cu@-508,3,1621,world|-528,15,1641,world as:Blacksmith_1
+    on player clicks magma in Blacksmith_1:
+    - if <player.inventory.contains.material[iron_ore].quantity[3]> {
+      - flag server HasIronOre:<green> duration:1s
+    }
+    else {
+      - flag server HasIronOre:<dark_gray> duration:1s
+    }
+    - if <player.inventory.contains.material[gold_ore].quantity[3]> {
+      - flag server HasGoldOre:<green> duration:1s
+    }
+    else {
+      - flag server HasGoldOre:<dark_gray> duration:1s
+    }
+    - if <player.inventory.contains.material[coal].quantity[1]> {
+      - flag server HasCoal:<green> duration:1s
+    }
+    else {
+      - flag server HasCoal:<dark_gray> duration:1s
+    }
+    - inventory open d:in@Smelting_Menu 
+    on player clicks in Smelting_Menu:
+    - determine cancelled
+    on player drags in Smelting_Menu:
+    - determine cancelled
+    on player clicks Iron_Ingot_Icon in Smelting_Menu:
+    - if <player.inventory.contains.material[iron_ore].quantity[3]> {
+      - flag server HasIronOre:<green> duration:1s
+    }
+    else {
+      - flag server HasIronOre:<dark_gray> duration:1s
+    }
+    - if <player.inventory.contains.material[coal].quantity[1]> {
+      - flag server HasCoal:<green> duration:1s
+    }
+    else {
+      - flag server HasCoal:<dark_gray> duration:1s
+    }
+    - if <player.inventory.contains.material[iron_ore].quantity[6]> {
+      - flag server HasIronOre2:<green> duration:1s
+    }
+    else {
+      - flag server HasIronOre2:<dark_gray> duration:1s
+    }
+    - if <player.inventory.contains.material[coal].quantity[2]> {
+      - flag server HasCoal2:<green> duration:1s
+    }
+    else {
+      - flag server HasCoal2:<dark_gray> duration:1s
+    }
+    - if <player.inventory.contains.material[iron_ore].quantity[12]> {
+      - flag server HasIronOre4:<green> duration:1s
+    }
+    else {
+      - flag server HasIronOre4:<dark_gray> duration:1s
+    }
+    - if <player.inventory.contains.material[coal].quantity[4]> {
+      - flag server HasCoal4:<green> duration:1s
+    }
+    else {
+      - flag server HasCoal4:<dark_gray> duration:1s
+    }
+    - if <player.inventory.contains.material[iron_ore].quantity[24]> {
+      - flag server HasIronOre8:<green> duration:1s
+    }
+    else {
+      - flag server HasIronOre8:<dark_gray> duration:1s
+    }
+    - if <player.inventory.contains.material[coal].quantity[8]> {
+      - flag server HasCoal8:<green> duration:1s
+    }
+    else {
+      - flag server HasCoal8:<dark_gray> duration:1s
+    }
+    - if <player.inventory.contains.material[iron_ore].quantity[48]> {
+      - flag server HasIronOre16:<green> duration:1s
+    }
+    else {
+      - flag server HasIronOre16:<dark_gray> duration:1s
+    }
+    - if <player.inventory.contains.material[coal].quantity[16]> {
+      - flag server HasCoal16:<green> duration:1s
+    }
+    else {
+      - flag server HasCoal16:<dark_gray> duration:1s
+    }
+    - inventory open d:in@Iron_Ingot_Smelting_Menu
+    on player clicks Gold_Ingot_Icon in Smelting_Menu:
+    - if <player.inventory.contains.material[gold_ore].quantity[3]> {
+      - flag server HasGoldOre:<green> duration:1s
+    }
+    else {
+      - flag server HasGoldOre:<dark_gray> duration:1s
+    }
+    - if <player.inventory.contains.material[coal].quantity[1]> {
+      - flag server HasCoal:<green> duration:1s
+    }
+    else {
+      - flag server HasCoal:<dark_gray> duration:1s
+    }
+    - if <player.inventory.contains.material[gold_ore].quantity[6]> {
+      - flag server HasGoldOre2:<green> duration:1s
+    }
+    else {
+      - flag server HasGoldOre2:<dark_gray> duration:1s
+    }
+    - if <player.inventory.contains.material[coal].quantity[2]> {
+      - flag server HasCoal2:<green> duration:1s
+    }
+    else {
+      - flag server HasCoal2:<dark_gray> duration:1s
+    }
+    - if <player.inventory.contains.material[gold_ore].quantity[12]> {
+      - flag server HasGoldOre4:<green> duration:1s
+    }
+    else {
+      - flag server HasGoldOre4:<dark_gray> duration:1s
+    }
+    - if <player.inventory.contains.material[coal].quantity[4]> {
+      - flag server HasCoal4:<green> duration:1s
+    }
+    else {
+      - flag server HasCoal4:<dark_gray> duration:1s
+    }
+    - if <player.inventory.contains.material[gold_ore].quantity[24]> {
+      - flag server HasGoldOre8:<green> duration:1s
+    }
+    else {
+      - flag server HasGoldOre8:<dark_gray> duration:1s
+    }
+    - if <player.inventory.contains.material[coal].quantity[8]> {
+      - flag server HasCoal8:<green> duration:1s
+    }
+    else {
+      - flag server HasCoal8:<dark_gray> duration:1s
+    }
+    - if <player.inventory.contains.material[gold_ore].quantity[48]> {
+      - flag server HasGoldOre16:<green> duration:1s
+    }
+    else {
+      - flag server HasGoldOre16:<dark_gray> duration:1s
+    }
+    - if <player.inventory.contains.material[coal].quantity[16]> {
+      - flag server HasCoal16:<green> duration:1s
+    }
+    else {
+      - flag server HasCoal16:<dark_gray> duration:1s
+    }
+    - inventory open d:in@Gold_Ingot_Smelting_Menu
+### Sub Menu ###
+
+Iron_Ingot_Smelting_Menu:
+  type: Inventory
+  inventory: HOPPER
+  title: <&6><&l>Select amount<&co>
+  slots:
+  - "[i@Iron_Ingot_Icon] [i@Iron_ingot_Icon_2[quantity=2]] [i@Iron_ingot_Icon_4[quantity=4]] [i@Iron_ingot_Icon_8[quantity=8]] [i@Iron_ingot_Icon_16[quantity=16]]"
+
+Iron_Ingot_Smelting_Menu_Handler:
+  type: world
+  events:
+    on player clicks in Iron_Ingot_Smelting_Menu:
+    - determine cancelled
+    on player drags in Iron_Ingot_Smelting_Menu:
+    - determine cancelled
+    on player clicks Iron_Ingot_Icon in Iron_Ingot_Smelting_Menu:
+    - if <player.inventory.contains.material[iron_ore].quantity[3]> && <player.inventory.contains.material[coal].quantity[1]> {
+      - inventory close
+      - inject Smelting_Process
+      - inject Iron_Smelting
+    }
+    else {
+      - inventory close
+      - narrate "<&c>You do not have enough materials to craft this item!"
+    }
+    on player clicks iron_ingot_Icon_2 in Iron_Ingot_Smelting_Menu:
+    - if <player.inventory.contains.material[iron_ore].quantity[6]> && <player.inventory.contains.material[coal].quantity[2]> {
+      - inventory close
+      - repeat 2 {
+        - inject Smelting_Process
+        - inject Iron_Smelting
+      }
+    }
+    else {
+      - inventory close
+      - narrate "<&c>You do not have enough materials to craft this item!"
+    }
+    on player clicks iron_ingot_Icon_4 in Iron_Ingot_Smelting_Menu:
+    - if <player.inventory.contains.material[iron_ore].quantity[12]> && <player.inventory.contains.material[coal].quantity[4]> {
+      - inventory close
+      - repeat 4 {
+        - inject Smelting_Process
+        - inject Iron_Smelting
+      }
+    }
+    else {
+      - inventory close
+      - narrate "<&c>You do not have enough materials to craft this item!"
+    }
+    on player clicks iron_ingot_Icon_8 in Iron_Ingot_Smelting_Menu:
+    - if <player.inventory.contains.material[iron_ore].quantity[24]> && <player.inventory.contains.material[coal].quantity[8]> {
+      - inventory close
+      - repeat 8 {
+        - inject Smelting_Process
+        - inject Iron_Smelting
+      }
+    }
+    else {
+      - inventory close
+      - narrate "<&c>You do not have enough materials to craft this item!"
+    }
+    on player clicks iron_ingot_Icon_16 in Iron_Ingot_Smelting_Menu:
+    - if <player.inventory.contains.material[iron_ore].quantity[48]> && <player.inventory.contains.material[coal].quantity[16]> {
+      - inventory close
+      - repeat 16 {
+        - inject Smelting_Process
+        - inject Iron_Smelting
+      }
+    }
+    else {
+      - inventory close
+      - narrate "<&c>You do not have enough materials to craft this item!"
+    }
+    on player clicks Gold_Ingot_Icon in Gold_Ingot_Smelting_Menu:
+    - if <player.inventory.contains.material[gold_ore].quantity[3]> && <player.inventory.contains.material[coal].quantity[1]> {
+      - inventory close
+      - inject Smelting_Process
+      - inject Gold_Smelting
+    }
+    else {
+      - inventory close
+      - narrate "<&c>You do not have enough materials to craft this item!"
+    }
+    on player clicks Gold_ingot_Icon_2 in Gold_Ingot_Smelting_Menu:
+    - if <player.inventory.contains.material[gold_ore].quantity[6]> && <player.inventory.contains.material[coal].quantity[2]> {
+      - inventory close
+      - repeat 2 {
+        - inject Smelting_Process
+        - inject Gold_Smelting
+      }
+    }
+    else {
+      - inventory close
+      - narrate "<&c>You do not have enough materials to craft this item!"
+    }
+    on player clicks Gold_ingot_Icon_4 in Gold_Ingot_Smelting_Menu:
+    - if <player.inventory.contains.material[gold_ore].quantity[12]> && <player.inventory.contains.material[coal].quantity[4]> {
+      - inventory close
+      - repeat 4 {
+        - inject Smelting_Process
+        - inject Gold_Smelting
+      }
+    }
+    else {
+      - inventory close
+      - narrate "<&c>You do not have enough materials to craft this item!"
+    }
+    on player clicks Gold_ingot_Icon_8 in Gold_Ingot_Smelting_Menu:
+    - if <player.inventory.contains.material[gold_ore].quantity[24]> && <player.inventory.contains.material[coal].quantity[8]> {
+      - inventory close
+      - repeat 8 {
+        - inject Smelting_Process
+        - inject Gold_Smelting
+      }
+    }
+    else {
+      - inventory close
+      - narrate "<&c>You do not have enough materials to craft this item!"
+    }
+    on player clicks Gold_ingot_Icon_16 in Gold_Ingot_Smelting_Menu:
+    - if <player.inventory.contains.material[gold_ore].quantity[48]> && <player.inventory.contains.material[coal].quantity[16]> {
+      - inventory close
+      - repeat 16 {
+        - inject Smelting_Process
+        - inject Gold_Smelting
+      }
+    }
+    else {
+      - inventory close
+      - narrate "<&c>You do not have enough materials to craft this item!"
+Gold_Ingot_Smelting_Menu:
+  type: Inventory
+  inventory: HOPPER
+  title: <&6><&l>Select amount<&co>
+  slots:
+  - "[i@gold_Ingot_Icon] [i@gold_ingot_Icon_2[quantity=2]] [i@gold_ingot_Icon_4[quantity=4]] [i@gold_ingot_Icon_8[quantity=8]] [i@gold_ingot_Icon_16[quantity=16]]"
+
+
+### Processing Scripts ###
+
+Smelting_Process:
+  type: task
+  script:
+    - if <player.location.is_within[Blacksmith_1]> {
+      - actionbar "<&l>0% <&e><&l>||||||||||||||||||||||||||||||||||||||||||||||||||"
+      - wait 0.5s
+      - actionbar "<&l>20% <&a><&l>||||||||||<&e><&l>||||||||||||||||||||||||||||||||||||||||"
+      - wait 0.5s
+      - actionbar "<&l>40% <&a><&l>||||||||||||||||||||<&e><&l>||||||||||||||||||||||||||||||"
+      - wait 0.5s
+      - actionbar "<&l>60% <&a><&l>||||||||||||||||||||||||||||||<&e><&l>||||||||||||||||||||"
+      - wait 0.5s
+      - actionbar "<&l>80% <&a><&l>||||||||||||||||||||||||||||||||||||||||<&e><&l>||||||||||"
+      - wait 0.5s
+      - actionbar "<&l>100% <&a><&l>||||||||||||||||||||||||||||||||||||||||||||||||||"
+      - wait 0.5s
+    }
+    else {
+      - narrate "<&c>You must be at the Blacksmith to smelt!"
+      - queue clear
+    }
+
+Gold_Smelting:
+  type: task
+  script:
+    - if <player.inventory.contains.material[gold_ore].quantity[3]> && <player.inventory.contains.material[coal].quantity[1]> {
+            - playsound <player.location> sound:BLOCK_LAVA_EXTINGUISH volume:0.5 pitch:1.0
+            - take i@gold_ore quantity:3
+            - take i@coal quantity:1
+            - give i@gold_ingot quantity:1
+          }
+          else {
+            - narrate "<&c>You do not have enough materials to craft this item!"
+            - queue clear
+          }
+
+Iron_Smelting:
+  type: task
+  script:
+    - if <player.inventory.contains.material[iron_ore].quantity[3]> && <player.inventory.contains.material[coal].quantity[1]> {
+        - playsound <player.location> sound:BLOCK_LAVA_EXTINGUISH volume:0.5 pitch:1.0
+        - take i@iron_ore quantity:3
+        - take i@coal quantity:1
+        - give i@iron_ingot quantity:1
+      }
+      else {
+        - narrate "<&c>You do not have enough materials to craft this item!"
+        - queue clear
+      }
+
+### Icons ###
+
+Iron_Ingot_Icon:
+  type: item
+  material: iron_ingot
+  display name: <&6><&l>Iron Ingot
+  lore:
+  - <&e>Cost:<&7>
+  - <server.flag[HasIronOre]>3x Iron Ore
+  - <server.flag[HasCoal]>1x Coal
+
+Iron_Ingot_Icon_2:
+  type: item
+  material: iron_ingot
+  display name: <&6><&l>Iron Ingot
+  lore:
+  - <&e>Cost:<&7>
+  - <server.flag[HasIronOre2]>6x Iron Ore
+  - <server.flag[HasCoal2]>2x Coal
+
+Iron_Ingot_Icon_4:
+  type: item
+  material: iron_ingot
+  display name: <&6><&l>Iron Ingot
+  lore:
+  - <&e>Cost:<&7>
+  - <server.flag[HasIronOre4]>12x Iron Ore
+  - <server.flag[HasCoal4]>4x Coal
+
+Iron_Ingot_Icon_8:
+  type: item
+  material: iron_ingot
+  display name: <&6><&l>Iron Ingot
+  lore:
+  - <&e>Cost:<&7>
+  - <server.flag[HasIronOre8]>24x Iron Ore
+  - <server.flag[HasCoal8]>8x Coal
+
+Iron_Ingot_Icon_16:
+  type: item
+  material: iron_ingot
+  display name: <&6><&l>Iron Ingot
+  lore:
+  - <&e>Cost:<&7>
+  - <server.flag[HasIronOre16]>48x Iron Ore
+  - <server.flag[HasCoal16]>16x Coal
+
+Gold_Ingot_Icon:
+  type: item
+  material: gold_ingot
+  display name: <&6><&l>Gold Ingot
+  lore:
+  - <&e>Cost:<&7>
+  - <server.flag[HasGoldOre]>3x Gold Ore
+  - <server.flag[HasCoal]>1x Coal
+
+Gold_Ingot_Icon_2:
+  type: item
+  material: gold_ingot
+  display name: <&6><&l>Gold Ingot
+  lore:
+  - <&e>Cost:<&7>
+  - <server.flag[HasGoldOre2]>6x Gold Ore
+  - <server.flag[HasCoal2]>2x Coal
+
+Gold_Ingot_Icon_4:
+  type: item
+  material: gold_ingot
+  display name: <&6><&l>Gold Ingot
+  lore:
+  - <&e>Cost:<&7>
+  - <server.flag[HasGoldOre4]>12x Gold Ore
+  - <server.flag[HasCoal4]>4x Coal
+
+Gold_Ingot_Icon_8:
+  type: item
+  material: gold_ingot
+  display name: <&6><&l>Gold Ingot
+  lore:
+  - <&e>Cost:<&7>
+  - <server.flag[HasGoldOre8]>24x Gold Ore
+  - <server.flag[HasCoal8]>8x Coal
+
+Gold_Ingot_Icon_16:
+  type: item
+  material: gold_ingot
+  display name: <&6><&l>Gold Ingot
+  lore:
+  - <&e>Cost:<&7>
+  - <server.flag[HasGoldOre16]>48x Gold Ore
+  - <server.flag[HasCoal16]>16x Coal
