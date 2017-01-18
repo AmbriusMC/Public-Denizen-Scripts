@@ -1,0 +1,122 @@
+WoodCutting:
+  type: world
+  events:
+    on server start:
+    - note cu@-451,28,1637,world|-470,4,1617,world as:Tree_1
+    - if <server.flag[Tree_1]> == Chopped {
+      - wait 30s
+      - schematic load name:Tree_1
+      - schematic paste name:Tree_1 <cu@Tree_1.min>
+      - schematic unload name:Tree_1
+    }
+    - flag server Tree_1:20
+    on player breaks oak_log_ball in Tree_1:
+    - if <server.flag[Tree_1]> == Chopped {
+      - narrate "<&c>This tree has already been chopped down!"
+      - queue clear
+    }
+    else {
+      - playeffect <context.location> effect:EXPLOSION_NORMAL quantity:3
+      - flag server Tree_1:-:1
+      - run WoodCutting_Handler
+      - if !<player.has_flag[No_Sound]> {
+        - playsound <context.location> sound:BLOCK_WOOD_BREAK volume:2 pitch:1.4
+        - wait 0.5s
+        - playsound <context.location> sound:BLOCK_WOOD_BREAK volume:2 pitch:1.4        
+        - flag player No_Sound duration:1.5s  
+      }
+    }
+    on player breaks oak_log_north in Tree_1:
+    - determine passively NOTHING
+    - modifyblock <context.location> m@air
+    - give i@log quantity:1
+    - playeffect <context.location> effect:EXPLOSION_NORMAL quantity:3
+    - if !<player.has_flag[No_Sound]> {
+      - playsound <context.location> sound:BLOCK_WOOD_BREAK volume:2 pitch:1.4
+      - wait 0.5s
+      - playsound <context.location> sound:BLOCK_WOOD_BREAK volume:2 pitch:1.4
+      - flag player No_Sound duration:1.5s  
+    }
+    on player breaks oak_log:
+    - if <player.gamemode.id> == 2 {
+      - determine passively cancelled
+    }
+    on player breaks oak_log_north:
+    - if <player.gamemode.id> == 2 {
+      - determine passively cancelled
+    }
+    on player breaks oak_log_south:
+    - if <player.gamemode.id> == 2 {
+      - determine passively cancelled
+    }
+    on player breaks oak_log_east:
+    - if <player.gamemode.id> == 2 {
+      - determine passively cancelled
+    }
+    on player breaks oak_log_west:
+    - if <player.gamemode.id> == 2 {
+      - determine passively cancelled
+    }
+    on player breaks oak_log_ball:
+    - if <player.gamemode.id> == 2 {
+      - determine passively cancelled 
+    }
+
+WoodCutting_Handler:
+  type: task
+  script:
+    - inject locally Process_<server.flag[Tree_1].round>
+    - if <server.flag[Tree_1]> <= 0 {
+      - flag server Tree_1:Chopped
+      - schematic load name:Tree_1_Chopped
+      - schematic paste name:Tree_1_Chopped <cu@Tree_1.min>
+      - playsound <player.location> sound:ENTITY_ZOMBIE_ATTACK_DOOR_WOOD volume:1.0 pitch:0.7
+      - playsound <player.location> sound:BLOCK_GRAVEL_STEP volume:1.5 pitch:0.5
+      - give i@log quantity:10
+      - schematic unload name:Tree_1_Chopped
+      - wait <util.random.int[60].to[120]>s
+      - schematic load name:Tree_1
+      - schematic paste name:Tree_1 <cu@Tree_1.min>
+      - flag server Tree_1:20
+      - schematic unload name:Tree_1
+    }
+  Process_19:
+    - actionbar "<&l>5% <&a><&l>||<&e><&l>||||||||||||||||||||||||||||||||||||||||||||||||"
+  Process_18:
+    - actionbar "<&l>10% <&a><&l>|||||<&e><&l>|||||||||||||||||||||||||||||||||||||||||||||"
+  Process_17:
+    - actionbar "<&l>15% <&a><&l>|||||||<&e><&l>|||||||||||||||||||||||||||||||||||||||||||"
+  Process_16:
+    - actionbar "<&l>20% <&a><&l>||||||||||<&e><&l>||||||||||||||||||||||||||||||||||||||||"
+  Process_15:
+    - actionbar "<&l>25% <&a><&l>||||||||||||<&e><&l>||||||||||||||||||||||||||||||||||||||"
+  Process_14:
+    - actionbar "<&l>30% <&a><&l>|||||||||||||||<&e><&l>|||||||||||||||||||||||||||||||||||"
+  Process_13:
+    - actionbar "<&l>35% <&a><&l>|||||||||||||||||<&e><&l>|||||||||||||||||||||||||||||||||"
+  Process_12:
+    - actionbar "<&l>40% <&a><&l>||||||||||||||||||||<&e><&l>||||||||||||||||||||||||||||||"
+  Process_11:
+    - actionbar "<&l>45% <&a><&l>||||||||||||||||||||||<&e><&l>||||||||||||||||||||||||||||"
+  Process_10:
+    - actionbar "<&l>50% <&a><&l>|||||||||||||||||||||||||<&e><&l>|||||||||||||||||||||||||"
+  Process_9:
+    - actionbar "<&l>55% <&a><&l>|||||||||||||||||||||||||||<&e><&l>|||||||||||||||||||||||"
+  Process_8:
+    - actionbar "<&l>60% <&a><&l>||||||||||||||||||||||||||||||<&e><&l>||||||||||||||||||||"
+  Process_7:
+    - actionbar "<&l>65% <&a><&l>||||||||||||||||||||||||||||||||<&e><&l>||||||||||||||||||"
+  Process_6:
+    - actionbar "<&l>70% <&a><&l>|||||||||||||||||||||||||||||||||||<&e><&l>|||||||||||||||"
+  Process_5:
+    - actionbar "<&l>75% <&a><&l>|||||||||||||||||||||||||||||||||||||<&e><&l>|||||||||||||"
+  Process_4:
+    - actionbar "<&l>80% <&a><&l>||||||||||||||||||||||||||||||||||||||||<&e><&l>||||||||||"
+  Process_3:
+    - actionbar "<&l>85% <&a><&l>||||||||||||||||||||||||||||||||||||||||||<&e><&l>||||||||"
+  Process_2:
+    - actionbar "<&l>90% <&a><&l>|||||||||||||||||||||||||||||||||||||||||||||<&e><&l>|||||"
+  Process_1:
+    - actionbar "<&l>95% <&a><&l>|||||||||||||||||||||||||||||||||||||||||||||||<&e><&l>|||"
+  Process_0:
+    - actionbar "<&l>100% <&a><&l>||||||||||||||||||||||||||||||||||||||||||||||||||<&e><&l>"
