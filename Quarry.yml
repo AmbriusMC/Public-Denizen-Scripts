@@ -1,0 +1,14 @@
+Quarry:
+  type: world
+  events:
+    on server start:
+    - note cu@-480,3,1610,world|-439,30,1649,world as:Quarry_1
+    on player breaks iron_ore in Quarry_1:
+    - determine passively NOTHING
+    - playsound <context.location> sound:BLOCK_ANVIL_USE volume:0.8 pitch:1.1
+    - playeffect <context.location> effect:EXPLOSION_NORMAL quantity:5
+    - wait 1t
+    - modifyblock <context.location> cobblestone
+    - give i@iron_ore quantity:1
+    - wait <util.random.int[10].to[60]>s
+    - modifyblock <context.location> <context.material>
