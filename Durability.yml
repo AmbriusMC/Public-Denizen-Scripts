@@ -1,0 +1,18 @@
+Durability:
+  type: world
+  events:
+    on player item takes damage:
+    - determine passively cancelled
+    - define ID <player.name>
+    - if <in@%ID%_broken_1.is_empty> {
+      - note in@generic[size=9;title=Broken;contents=li@<context.item>|<in@%ID%_broken_2.list_contents.get[1]>|<in@%ID%_broken_2.list_contents.get[2]>] 'as:<player.name>_broken_1'
+      - note in@generic[size=9;title=Broken;contents=li@i@air] 'as:<player.name>_broken_2'
+    }
+    else if <in@%ID%_broken_2.is_empty> {
+      - note in@generic[size=9;title=Broken;contents=li@<context.item>|<in@%ID%_broken_1.list_contents.get[1]>|<in@%ID%_broken_1.list_contents.get[2]>] 'as:<player.name>_broken_2'
+      - note in@generic[size=9;title=Broken;contents=li@i@air] 'as:<player.name>_broken_1'
+    }
+    else {
+      - note in@generic[size=9;title=Broken;contents=li@<context.item>] 'as:<player.name>_broken_1'
+      - note in@generic[size=9;title=Broken;contents=li@i@air] 'as:<player.name>_broken_2
+    }
