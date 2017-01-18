@@ -1,0 +1,152 @@
+House_Select:
+	type: assignment
+	actions: 
+		on assignment:
+		- trigger name:click state:true
+		on click:
+		- inventory open d:in@House_Menu
+
+House_Menu:
+	type: Inventory
+	title: <&6><&l>Select A House
+	size: 9
+	slots:
+	- "[i@No_House] [i@Small_House] [i@Medium_House] [i@Large_House] [] [] [] [] []"
+
+No_House:
+	type: item
+	material: 166
+	display name: <&a><&l>No House
+	lore:
+	- <gold>Price: <&e>Free
+
+Small_House:
+	type: item
+	material: bed
+	display name: <&a><&l>Small House
+	lore:
+	- <gold>Price: <&e>100
+
+Medium_House:
+	type: item
+	material: bed
+	display name: <&a><&l>Medium House
+	lore:
+	- <gold>Price: <&e>500
+
+Large_House:
+	type: item
+	material: bed
+	display name: <&a><&l>Large House
+	lore:
+	- <gold>Price: <&e>1000
+
+House_Menu_Handler:
+	type: world
+	debug: false
+	events:
+		on player clicks in House_Menu:
+		- determine cancelled
+		on player drags in House_Menu:
+		- determine cancelled
+		on player clicks No_House in House_Menu:
+		- schematic load name:No_House
+		- define HouseCuboid <player.location.cuboids.closest_to[HouseCuboid_Small_]>
+		- schematic paste name:No_House <def[HouseCuboid].min>
+		- remove <def[HouseCuboid].list_entities[DROPPED_ITEM]>
+		- schematic unload name:No_House
+		- title "subtitle:<&6>Your house has been removed!"
+		- inventory close
+		on player clicks Small_House in House_Menu:
+		- if <player.money> >= 100 {
+			- take money quantity:100
+			- schematic load name:Small_House
+			- define HouseCuboid <player.location.cuboids.closest_to[HouseCuboid_Small_]>
+			- schematic paste name:Small_House <def[HouseCuboid].min>
+			- remove <def[HouseCuboid].list_entities[DROPPED_ITEM]>
+			- schematic unload name:Small_House
+			- title "subtitle:<&6>You have bought a <&a><&l>Small House<&6>!"
+		}
+		else {
+			- narrate "<&6>You do not have enough money"
+		}
+		- inventory close
+		on player clicks Medium_House in House_Menu:
+		- if <player.money> >= 500 {
+			- take money quantity:500
+			- schematic load name:Medium_House
+			- define HouseCuboid <player.location.cuboids.closest_to[HouseCuboid_Small_]>
+			- schematic paste name:Medium_House <def[HouseCuboid].min>
+			- remove <def[HouseCuboid].list_entities[DROPPED_ITEM]>
+			- schematic unload name:Medium_House
+			- title "subtitle:<&6>You have bought a <&a><&l>Medium House<&6>!"
+		}
+		else {
+			- narrate "<&6>You do not have enough money"
+		}
+		- inventory close
+		on player clicks Large_House in House_Menu:
+		- if <player.money> >= 1000 {
+			- take money quantity:1000
+			- schematic load name:Large_House
+			- define HouseCuboid <player.location.cuboids.closest_to[HouseCuboid_Small_]>
+			- schematic paste name:Large_House <def[HouseCuboid].min>
+			- remove <def[HouseCuboid].list_entities[DROPPED_ITEM]>
+			- schematic unload name:Large_House
+			- title "subtitle:<&6>You have bought a <&a><&l>Large House<&6>!"
+		}
+		else {
+			- narrate "<&6>You do not have enough money"
+		}
+		- inventory close
+		on server start:
+		- note cu@-484,3,1587,world|-494,11,1597,world as:HouseCuboid_Small_1
+		- note cu@-484,3,1573,world|-494,12,1583,world as:HouseCuboid_Small_2
+
+House_Purchase_Command:
+  type: command
+  debug: false
+  name: HouseShop
+  usage: /HouseShop
+  description: 
+  script:
+	- if <player.location.cuboids.formatted> contains HouseCuboid_ {
+		- inventory open d:in@House_Menu
+	}
+	else {
+		- narrate "<&6>[<&a><&l>House<&6>]  <&c>You are not within any purchasable proporties!"
+	}
+
+House_Handler:
+	type: world
+	debug: false
+	events:
+		on player enters notable cuboid:
+		- if <context.cuboids.formatted> contains House {
+			- run s@House_Message_Handler 'def:House|<&e>You have entered a purchasable property!'
+		}
+
+House_Message_Handler:
+  type: item
+  debug: false
+  definitions: title|msg
+  material: i@human_skull
+  display name: "<&6>     [<&a>---<&6>]"
+  lore:
+  - <&a>Click to open shop!
+  script:
+    - ^define text '<&6>[<&a><&l>%title%<&6>]'
+    - ^if !<player.is_player||false> {
+      - announce to_console "%text% %msg%"
+      - goto 'end'
+    }
+    - ^define icon 'i@human_skull[display_name=<proc[msgCentered].context[19|	  <&a><&l>Shop Menu]>]'
+    - ^adjust %icon% 'lore:<&sp>|<&6>Click to open the shop!' save:item
+    - ^define hover '{<entry[item].result.json>}'
+    - ^define click '/HouseShop'
+    - ^define button '"text":"%text%","clickEvent":{"action":"run_command","value":"%click%"},"hoverEvent":{"action":"show_item","value":"%hover%"}'
+    - ^define spacer '"text":"  "'
+    - ^foreach '<proc[lineWrap].context[<parse:<def[msg]>>|<el@val[70].sub[<def[text].length>]>]>' {
+      - ^execute as_server 'tellraw <player.name> {"text":"","extra":[{%button%},{%spacer%},{"text":"<def[value].unescaped>"}]}'
+      }
+    - mark 'end'
