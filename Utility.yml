@@ -5,11 +5,11 @@ HealthBar:
     on player joins:
     - scoreboard add viewers:<player> id:HealthBar obj:<&c>Health criteria:health displayslot:below_name
 
-### Mobs ###
+### Mobs Script ###
 
 Enchant_Command:
   type: command
-  debug: true
+  debug: false
   name: Enchant
   usage: /Enchant (enchantment) (level) or /Enchant list
   aliases: 
@@ -81,7 +81,7 @@ Enchant_Level_Menu:
 
 Enchant_Menu_Handler:
   type: world
-  debug: true
+  debug: false
   events:
     on player clicks Enchantment_Level_1 in Enchant_Level_Menu:
     - flag player Enchantment_Level:1
@@ -295,7 +295,6 @@ Enchant_Menu_Handler:
     - inventory open d:in@Enchant_Level_Menu
     - flag player Previous_Menu:Misc_Enchantments_Menu
     - flag player Enchantment:VANISHING_CURSE
-
 
 Enchanting_Process:
   type: task
