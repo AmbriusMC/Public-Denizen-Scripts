@@ -5,7 +5,435 @@ HealthBar:
     on player joins:
     - scoreboard add viewers:<player> id:HealthBar obj:<&c>Health criteria:health displayslot:below_name
 
-### Mobs Script ###
+Mob:
+  type: command
+  debug: true
+  name: Mob
+  usage: /Mob (entity) (amount) (location) or /Mob list
+  description: Spawn entities or display a list of spawnable entities.
+  permission: utility.mob
+  permission message: <&7>Sorry, <&6><player.name><&7>. You can't use this command because you don't have the permission <&f>'<permission>'<&7>!
+  tab complete: 
+  - if !<player.is_op||<context.server>> queue clear 
+  - determine <li@BAT|BLAZE|CAVE_SPIDER|CHICKEN|COW|CREEPER|DONKEY|ELDER_GUARDIAN|ENDER_DRAGON|ENDERMAN|ENDERMITE|EVOKER|GHAST|GIANT|GIANT|HORSE|HUSK|IRON_GOLEM|LLAMA|MAGMA_CUBE|MULE|MUSHROOM_COW|OCELOT|PIG|PIG_ZOMBIE|POLAR_BEAR|RABBIT|SHEEP|SHULKER|SILVERFISH|SKELETON|SKELETON_HORSE|SLIME|SNOWMAN|SPIDER|SQUID|STRAY|VEX|VILLAGER|VINDICATOR|WITCH|WITHER|WITHER_SKELETON|WOLF|ZOMBIE|ZOMBIE_HORSE|ZOMBIE_VILLAGER.filter[starts_with[<context.args.last>]]>
+  script:
+  - if <context.args.size> == 0 {
+    - narrate "<&c>You must specify an entity!"
+    - queue clear
+  }
+  - if <context.args.size> == 1 {
+    - if <li@BAT|BLAZE|CAVE_SPIDER|CHICKEN|COW|CREEPER|DONKEY|ELDER_GUARDIAN|ENDER_DRAGON|ENDERMAN|ENDERMITE|EVOKER|GHAST|GIANT|GIANT|HORSE|HUSK|IRON_GOLEM|LLAMA|MAGMA_CUBE|MULE|MUSHROOM_COW|OCELOT|PIG|PIG_ZOMBIE|POLAR_BEAR|RABBIT|SHEEP|SHULKER|SILVERFISH|SKELETON|SKELETON_HORSE|SLIME|SNOWMAN|SPIDER|SQUID|STRAY|VEX|VILLAGER|VINDICATOR|WITCH|WITHER|WITHER_SKELETON|WOLF|ZOMBIE|ZOMBIE_HORSE|ZOMBIE_VILLAGER.contains[<context.args.get[1]>]> {
+      - spawn e@<context.args.get[1]> <player.location>
+      - queue clear
+    }
+    else if <context.args.get[1]> == list {
+      - narrate '<&6>Entities<&co> <&f><li@BAT|BLAZE|CAVE_SPIDER|CHICKEN|COW|CREEPER|DONKEY|ELDER_GUARDIAN|ENDER_DRAGON|ENDERMAN|ENDERMITE|EVOKER|GHAST|GIANT|GIANT|HORSE|HUSK|IRON_GOLEM|LLAMA|MAGMA_CUBE|MULE|MUSHROOM_COW|OCELOT|PIG|PIG_ZOMBIE|POLAR_BEAR|RABBIT|SHEEP|SHULKER|SILVERFISH|SKELETON|SKELETON_HORSE|SLIME|SNOWMAN|SPIDER|SQUID|STRAY|VEX|VILLAGER|VINDICATOR|WITCH|WITHER|WITHER_SKELETON|WOLF|ZOMBIE|ZOMBIE_HORSE|ZOMBIE_VILLAGER.formatted>'
+      - queue clear
+    }
+    else {
+      - narrate '<&c>This entity doesn't exist. Did you mean<&co> <&6><li@BAT|BLAZE|CAVE_SPIDER|CHICKEN|COW|CREEPER|DONKEY|ELDER_GUARDIAN|ENDER_DRAGON|ENDERMAN|ENDERMITE|EVOKER|GHAST|GIANT|GIANT|HORSE|HUSK|IRON_GOLEM|LLAMA|MAGMA_CUBE|MULE|MUSHROOM_COW|OCELOT|PIG|PIG_ZOMBIE|POLAR_BEAR|RABBIT|SHEEP|SHULKER|SILVERFISH|SKELETON|SKELETON_HORSE|SLIME|SNOWMAN|SPIDER|SQUID|STRAY|VEX|VILLAGER|VINDICATOR|WITCH|WITHER|WITHER_SKELETON|WOLF|ZOMBIE|ZOMBIE_HORSE|ZOMBIE_VILLAGER.closest_to[<context.args.get[1]>'
+      - queue clear 
+    }
+  }
+
+More_Command:
+  type: command
+  debug: false
+  name: More
+  usage: /More
+  aliases: 
+  - M
+  description: Changes the item stack in your hand to 64 of the item.
+  permission: utility.more
+  permission message: <&7>Sorry, <&6><player.name><&7>. You can't use this command because you don't have the permission <&f>'<permission>'<&7>!
+  script:
+  - if <player.item_in_hand> == i@air {
+    - narrate "<&c>You must have an item in your hand!"
+  }
+  else {
+    - adjust <player.item_in_hand> quantity:<player.item_in_hand.max_stack> save:new_stack
+    - take iteminhand quantity:<player.item_in_hand.quantity>
+    - give <entry[new_stack].result> 
+    - narrate "<&7>Increased <&6><player.item_in_hand.formatted><&7> to <&6><player.item_in_hand.max_stack><&7>!"
+  }
+
+Heal_Command:
+  type: command
+  debug: false
+  name: Heal
+  usage: /Heal (player)
+  aliases: 
+  - H
+  description: Fully restores a player's health and hunger.
+  permission: utility.heal
+  permission message: <&7>Sorry, <&6><player.name><&7>. You can't use this command because you don't have the permission <&f>'<permission>'<&7>!
+  script:
+  - if <context.server> && <context.args.size> == 0 {
+    - narrate "<&c>You must enter a player from console!"
+    - queue clear
+  }
+  - if <context.args.size> >= 1 {
+    - define Target <server.match_offline_player[<context.args.get[1]>]||null>
+    - if <def[Target]> == null {
+      - narrate "<&c>No player can be found by that name!"
+      - queue clear
+    }
+  }
+  else {
+    - heal <player>
+    - feed <player>
+    - narrate "<&7>You have been healed!"
+  }
+  - if <context.server.not> {
+    - if <context.args.size> >= 1 {
+      - heal p@<context.raw_args>
+      - feed p@<context.raw_args>
+      - narrate "<&7>You have been healed!" targets:p@<context.args.get[1]>
+      - narrate "<&7>You have healed <&6><context.args.get[1]><&7>!" targets:<player>
+      - queue clear
+    }
+  }
+
+Info:
+  type: command
+  debug: false
+  name: Info
+  usage: /Info (player)
+  description: Display a bunch of information about a player
+  permission: utility.info
+  permission message: <&7>Sorry, <&6><player.name><&7>. You can't use this command because you don't have the permission <&f>'<permission>'<&7>!
+  tab complete: 
+  - if !<player.is_op||<context.server>> queue clear 
+  - determine <server.list_players.parse[name].filter[starts_with[<context.args.last>]]>
+  script:
+  - if <context.args.size> == 0 {
+    - narrate '<&c>You must specify a player!'
+    - queue clear
+  }
+  - if <context.args.size> >= 1 {
+    - define Target <server.match_offline_player[<context.args.get[1]>]||null>
+    - if <def[Target]> == null {
+      - narrate "<&c>No player can be found by that name!"
+      - queue clear
+    }
+    else {
+      - define player p@<context.args.get[1]>
+      - ^narrate '<&2><&l>Info<&co> <&6><context.args.get[1]>'
+      - ^narrate '<&e>Online<&co> <&7><def[player].is_online>'
+      - ^narrate '<&e>Banned<&co> <&7><def[player].is_banned>'
+      - ^narrate '<&e>Location<&co> <&7><def[player].location.simple.formatted>'
+      - ^narrate '<&e>IP<&co> <&7><def[player].ip>'
+      - ^narrate '<&e>UUID<&co> <&7><def[player].uuid>'
+      - queue clear
+    }
+  }
+
+Spawn:
+  type: command
+  debug: false
+  name: Spawn
+  usage: /Spawn (player)
+  description: Teleports you to the world spawn.
+  permission: utility.spawn
+  permission message: <&7>Sorry, <&6><player.name><&7>. You can't use this command because you don't have the permission <&f>'<permission>'<&7>!
+  tab complete: 
+  - if !<player.is_op||<context.server>> queue clear 
+  - determine <server.list_online_players.parse[name].filter[starts_with[<context.args.last>]]>
+  script:
+  - if <context.args.size> == 0 {
+    - teleport <player> <player.location.world.spawn_location.center>
+    - narrate "<&7>You have teleported to the spawn in <&6><player.location.world><&7>!"
+    - queue clear
+  }
+  - if <context.args.size> >= 1 {
+    - define Target <server.match_player[<context.args.get[1]>]||null>
+    - if <def[Target]> == null {
+      - narrate "<&c>No player can be found by that name!"
+      - queue clear
+    }
+  }
+  else {
+    - narrate "<&c>You must specify a player!"
+    - queue clear
+  }
+  - if <context.server.not> {
+    - if <context.args.size> >= 1 {
+      - define player p@<context.args.get[1]>
+      - teleport p@<context.args.get[1]> <def[player].location.world.spawn_location.center>
+      - narrate "<&7>You have teleported to the spawn in <&6><def[player].location.world><&7>!" targets:p@<context.args.get[1]>
+      - narrate "<&6><context.args.get[1]> <&7>has been teleported to the spawn in <&6><def[player].location.world><&7>!"
+      - queue clear
+    }
+  }
+
+Inventory_Command:
+  type: command
+  debug: false
+  name: Inventory
+  usage: /Inventory (player)
+  aliases: 
+  - Inv
+  description: Edit a player's inventory.
+  permission: utility.inventory
+  permission message: <&7>Sorry, <&6><player.name><&7>. You can't use this command because you don't have the permission <&f>'<permission>'<&7>!
+  script:
+  - if <context.server> && <context.args.size> == 0 {
+    - narrate "<&c>You must enter a player from console!"
+    - queue clear
+  }
+  - if <context.args.size> >= 1 {
+    - define Target <server.match_offline_player[<context.args.get[1]>]||null>
+    - if <def[Target]> == null {
+      - narrate "<&c>No player can be found by that name!"
+      - queue clear
+    }
+  }
+  else {
+    - narrate "<&c>You must specify a player!"
+    - queue clear
+  }
+  - if <context.server.not> {
+    - if <context.args.size> >= 1 {
+      - narrate "<&7>Checking <&6><context.args.get[1]><&7>!"
+      - define Name p@<context.args.get[1]>
+      - inventory open d:<def[Name].inventory> 
+      - queue clear
+    }
+  }
+
+Gamemode_Command:
+  type: command
+  debug: false
+  name: Gm
+  usage: /Gm (player)
+  aliases: 
+  - Gamemode
+  description: Changes a player's gamemode. Doing the command without any variables will open a menu.
+  permission: utility.gamemode
+  permission message: <&7>Sorry, <&6><player.name><&7>. You can't use this command because you don't have the permission <&f>'<permission>'<&7>!
+  tab complete: 
+  - if !<player.is_op||<context.server>> queue clear 
+  - determine <server.list_online_players.parse[name].filter[starts_with[<context.args.last>]]>
+  script:
+  - if <context.args.size> == 0 {
+    - inventory open d:in@Gamemode_Menu
+    - queue clear
+  }
+  - if <context.args.size> == 1 {
+    - if <context.args.get[1]> == 0 {
+      - adjust <player> gamemode:survival
+      - narrate "<&7>You have switched to <&6>Survival Mode<&7>!"
+      - queue clear
+    }
+    else if <context.args.get[1]> == 1 {
+      - adjust <player> gamemode:creative
+      - narrate "<&7>You have switched to <&6>Creative Mode<&7>!"
+      - queue clear
+    }
+    else if <context.args.get[1]> == 2 {
+      - adjust <player> gamemode:adventure
+      - narrate "<&7>You have switched to <&6>Adventure Mode<&7>!"
+      - queue clear
+    }
+    else if <context.args.get[1]> == 3 {
+      - adjust <player> gamemode:spectator
+      - narrate "<&7>You have switched to <&6>Spectator Mode<&7>!"
+      - queue clear
+    }
+    else {
+      - narrate "<&c>You must specify a valid gamemode!"
+      - queue clear
+    }
+  }
+  - if <context.args.size> == 2 {
+    - define Target <server.match_offline_player[<context.args.get[2]>]||null>
+    - if <def[Target]> == null {
+      - narrate "<&c>No player can be found by that name!"
+      - queue clear
+    }
+    - if <context.args.get[1]> == 0 {
+      - adjust p@<context.args.get[2]> gamemode:survival
+      - narrate "<&7>You have switched to <&6>Survival Mode<&7>!" targets:p@<context.args.get[2]>
+      - narrate "<&7>You have switched <&6><context.args.get[2]><&7> to <&6>Survival Mode<&7>!"
+      - queue clear
+    }
+    else if <context.args.get[1]> == 1 {
+      - adjust p@<context.args.get[2]> gamemode:creative
+      - narrate "<&7>You have switched to <&6>Creative Mode<&7>!" targets:p@<context.args.get[2]>
+      - narrate "<&7>You have switched <&6><context.args.get[2]><&7> to <&6>Creative Mode<&7>!"
+      - queue clear
+    }
+    else if <context.args.get[1]> == 2 {
+      - adjust p@<context.args.get[2]> gamemode:adventure
+      - narrate "<&7>You have switched to <&6>Adventure Mode<&7>!" targets:p@<context.args.get[2]>
+      - narrate "<&7>You have switched <&6><context.args.get[2]><&7> to <&6>Adventure Mode<&7>!"
+      - queue clear
+    }
+    else if <context.args.get[1]> == 3 {
+      - adjust p@<context.args.get[2]> gamemode:spectator
+      - narrate "<&7>You have switched to <&6>Spectator Mode<&7>!" targets:p@<context.args.get[2]>
+      - narrate "<&7>You have switched <&6><context.args.get[2]><&7> to <&6>Spectator Mode<&7>!"
+      - queue clear
+    }
+    else {
+      - narrate "<&c>You must specify a valid gamemode!"
+      - queue clear
+    }
+  }
+
+Gamemode_Menu:
+  type: Inventory
+  inventory: HOPPER
+  title: <&6><&l>Select Gamemode<&co>
+  slots:
+  - "[i@Survival_Icon] [i@Creative_Icon] [i@Adventure_Icon] [i@Spectator_Icon] [i@Exit_Icon]"
+
+Gamemode_Menu_Handler:
+  type: world
+  debug: false
+  events:
+    on player clicks in Gamemode_Menu:
+    - determine cancelled
+    on player drags in Gamemode_Menu:
+    - determine cancelled
+    on player clicks Survival_Icon in Gamemode_Menu:
+    - adjust <player> gamemode:survival
+    - inventory close
+    - narrate "<&7>You have switched to <&6>Survival Mode<&7>!"
+    on player clicks Creative_Icon in Gamemode_Menu:
+    - adjust <player> gamemode:creative
+    - inventory close
+    - narrate "<&7>You have switched to <&6>Creative Mode<&7>!"
+    on player clicks Adventure_Icon in Gamemode_Menu:
+    - adjust <player> gamemode:adventure
+    - inventory close
+    - narrate "<&7>You have switched to <&6>Adventure Mode<&7>!"
+    on player clicks Spectator_Icon in Gamemode_Menu:
+    - adjust <player> gamemode:spectator
+    - inventory close
+    - narrate "<&7>You have switched to <&6>Spectator Mode<&7>!"
+    on player clicks Exit_Icon in Gamemode_Menu:
+    - inventory close
+
+Survival_Icon:
+  type: item
+  material: flint_and_steel
+  display name: <&6>Survival
+  lore:
+  - <&a>Click here to switch.
+
+Creative_Icon:
+  type: item
+  material: obsidian
+  display name: <&6>Creative
+  lore:
+  - <&a>Click here to switch.
+
+Adventure_Icon:
+  type: item
+  material: shield
+  display name: <&6>Adventure
+  lore:
+  - <&a>Click here to switch.
+
+Spectator_Icon:
+  type: item
+  material: eye_of_ender
+  display name: <&6>Spectator
+  lore:
+  - <&a>Click here to switch.
+
+Exit_Icon:
+  type: item
+  material: barrier
+  display name: <&c>Exit
+  lore:
+  - <&a>Click here to exit the menu.
+
+Item_Command:
+  type: command
+  debug: false
+  name: Item
+  usage: /Item (item) (amount) (name) (lore)
+  aliases: 
+  - I
+  description: Create items with custom name and lore.
+  permission: utility.item
+  permission message: <&7>Sorry, <&6><player.name><&7>. You can't use this command because you don't have the permission <&f>'<permission>'<&7>!
+  tab complete: 
+  - if !<player.is_op||<context.server>> queue clear 
+  - determine <server.list_online_players.parse[name].filter[starts_with[<context.args.last>]]>
+  script:
+  - if <context.args.size> == 0 {
+    - narrate "<&c>You must specify an item!"
+    - queue clear
+  }
+  - if <context.args.size> == 1 {
+    - define Item i@<context.args.get[1]>
+    - if <def[Item].id> == null {
+      - narrate "<&c>No item can be found by that name!"
+      - queue clear
+    }
+    else {
+      - give <def[Item]> quantity:1
+      - narrate "<&7><player.name> created <&f>1<&7> of <&f>[<context.args.get[1]>]" targets:<server.list_online_ops>
+      - queue clear
+    }
+  }
+  - if <context.args.size> == 2 {
+    - define Item i@<context.args.get[1]>
+    - define Number el@<context.args.get[2]>
+    - if <def[Item].id> == null {
+      - narrate "<&c>No item can be found by that name!"
+      - queue clear
+    }
+    -  if <def[Number].as_int> == null {
+      - narrate "<&c>You must specify a proper amount!"
+      - queue clear
+    }
+    else {
+      - give <def[Item]> quantity:<def[Number]>
+      - narrate "<&7><player.name> created <&f><context.args.get[2]><&7> of <&f>[<context.args.get[1]>]" targets:<server.list_online_ops>
+      - queue clear
+    }
+  }
+  - if <context.args.size> == 3 {
+    - define Item i@<context.args.get[1]>
+    - define Number el@<context.args.get[2]>
+    - define Name el@<context.args.get[3].replace[&].with[&ss]>
+    - if <def[Item].id> == null {
+      - narrate "<&c>No item can be found by that name!"
+      - queue clear
+    }
+    -  if <def[Number].as_int> == null {
+      - narrate "<&c>You must specify a proper amount!"
+      - queue clear
+    }
+    else {
+      - give <def[Item]>[display_name=<def[Name].replace[_].with[<&sp>]>] quantity:<def[Number]>
+      - narrate "<&7><player.name> created <&f><context.args.get[2]><&7> of <&f>[<context.args.get[1]>]" targets:<server.list_online_ops>
+      - queue clear
+    }
+  }
+    - if <context.args.size> == 4 {
+    - define Item i@<context.args.get[1]>
+    - define Number el@<context.args.get[2]>
+    - define Name el@<context.args.get[3].replace[&].with[&ss]>
+    - define Lore el@<context.args.get[4].replace[&].with[&ss]>
+    - if <def[Item].id> == null {
+      - narrate "<&c>No item can be found by that name!"
+      - queue clear
+    }
+    -  if <def[Number].as_int> == null {
+      - narrate "<&c>You must specify a proper amount!"
+      - queue clear
+    }
+    else {
+      - give <def[Item]>[display_name=<def[Name].replace[_].with[<&sp>]>;lore=<def[Lore].replace[_].with[<&sp>]>] quantity:<def[Number]>
+      - narrate "<&7><player.name> created <&f><context.args.get[2]><&7> of <&f>[<context.args.get[1]>]" targets:<server.list_online_ops>
+      - queue clear
+    }
+  }
 
 Enchant_Command:
   type: command
@@ -30,7 +458,7 @@ Enchant_Command:
     else if <context.args.size> == 1 {
       - if <context.args.get[1]> == list {
         - narrate "<&6>Enchantments<&co> <&f><li@ARROW_DAMAGE|ARROW_FIRE|ARROW_INFINITE|ARROW_KNOCKBACK|BINDING_CURSE|DAMAGE_ALL|DAMAGE_ARTHROPODS|DAMAGE_UNDEAD|DEPTH_STRIDER|DIG_SPEED|DURABILITY|FIRE_ASPECT|FROST_WALKER|KNOCKBACK|LOOT_BONUS_BLOCKS|LOOT_BONUS_MOBS|LUCK|LURE|MENDING|OXYGEN|PROTECTION_ENVIRONMENTAL|PROTECTION_EXPLOSIONS|PROTECTION_FALL|PROTECTION_FIRE|PROTECTION_PROJECTILE|SILK_TOUCH|SWEEPING_EDGE|THORNS|VANISHING_CURSE|WATER_WORKER.formatted>"
-        - queue clear
+        - queue clear 
       }
       - if <li@ARROW_DAMAGE|ARROW_FIRE|ARROW_INFINITE|ARROW_KNOCKBACK|BINDING_CURSE|DAMAGE_ALL|DAMAGE_ARTHROPODS|DAMAGE_UNDEAD|DEPTH_STRIDER|DIG_SPEED|DURABILITY|FIRE_ASPECT|FROST_WALKER|KNOCKBACK|LOOT_BONUS_BLOCKS|LOOT_BONUS_MOBS|LUCK|LURE|MENDING|OXYGEN|PROTECTION_ENVIRONMENTAL|PROTECTION_EXPLOSIONS|PROTECTION_FALL|PROTECTION_FIRE|PROTECTION_PROJECTILE|SILK_TOUCH|SWEEPING_EDGE|THORNS|VANISHING_CURSE|WATER_WORKER.contains[<context.args.get[1]>]> {
         - adjust <player.item_in_hand> enchantments:<player.item_in_hand.enchantments.with_levels.separated_by[|]>|<context.args.get[1]>,1 save:new_enchantments
@@ -40,7 +468,7 @@ Enchant_Command:
         - queue clear
       }
       else {
-        - narrate "<&c>Enchantment doesn't exist. Did you mean <&6><li@ARROW_DAMAGE|ARROW_FIRE|ARROW_INFINITE|ARROW_KNOCKBACK|BINDING_CURSE|DAMAGE_ALL|DAMAGE_ARTHROPODS|DAMAGE_UNDEAD|DEPTH_STRIDER|DIG_SPEED|DURABILITY|FIRE_ASPECT|FROST_WALKER|KNOCKBACK|LOOT_BONUS_BLOCKS|LOOT_BONUS_MOBS|LUCK|LURE|MENDING|OXYGEN|PROTECTION_ENVIRONMENTAL|PROTECTION_EXPLOSIONS|PROTECTION_FALL|PROTECTION_FIRE|PROTECTION_PROJECTILE|SILK_TOUCH|SWEEPING_EDGE|THORNS|VANISHING_CURSE|WATER_WORKER.closest_to[<context.args.get[1]>]><&c>?"
+        - narrate "<&c>This enchantment doesn't exist. Did you mean <&6><li@ARROW_DAMAGE|ARROW_FIRE|ARROW_INFINITE|ARROW_KNOCKBACK|BINDING_CURSE|DAMAGE_ALL|DAMAGE_ARTHROPODS|DAMAGE_UNDEAD|DEPTH_STRIDER|DIG_SPEED|DURABILITY|FIRE_ASPECT|FROST_WALKER|KNOCKBACK|LOOT_BONUS_BLOCKS|LOOT_BONUS_MOBS|LUCK|LURE|MENDING|OXYGEN|PROTECTION_ENVIRONMENTAL|PROTECTION_EXPLOSIONS|PROTECTION_FALL|PROTECTION_FIRE|PROTECTION_PROJECTILE|SILK_TOUCH|SWEEPING_EDGE|THORNS|VANISHING_CURSE|WATER_WORKER.closest_to[<context.args.get[1]>]><&c>?"
         - queue clear
       }
     }
@@ -58,7 +486,7 @@ Enchant_Command:
         - queue clear
       }
       else {
-        - narrate "<&c>Enchantment doesn't exist. Did you mean <&6><li@ARROW_DAMAGE|ARROW_FIRE|ARROW_INFINITE|ARROW_KNOCKBACK|BINDING_CURSE|DAMAGE_ALL|DAMAGE_ARTHROPODS|DAMAGE_UNDEAD|DEPTH_STRIDER|DIG_SPEED|DURABILITY|FIRE_ASPECT|FROST_WALKER|KNOCKBACK|LOOT_BONUS_BLOCKS|LOOT_BONUS_MOBS|LUCK|LURE|MENDING|OXYGEN|PROTECTION_ENVIRONMENTAL|PROTECTION_EXPLOSIONS|PROTECTION_FALL|PROTECTION_FIRE|PROTECTION_PROJECTILE|SILK_TOUCH|SWEEPING_EDGE|THORNS|VANISHING_CURSE|WATER_WORKER.closest_to[<context.args.get[1]>]><&c>?"
+        - narrate "<&c>Enchantment doesn't exist. Did you mean<&co> <&6><li@ARROW_DAMAGE|ARROW_FIRE|ARROW_INFINITE|ARROW_KNOCKBACK|BINDING_CURSE|DAMAGE_ALL|DAMAGE_ARTHROPODS|DAMAGE_UNDEAD|DEPTH_STRIDER|DIG_SPEED|DURABILITY|FIRE_ASPECT|FROST_WALKER|KNOCKBACK|LOOT_BONUS_BLOCKS|LOOT_BONUS_MOBS|LUCK|LURE|MENDING|OXYGEN|PROTECTION_ENVIRONMENTAL|PROTECTION_EXPLOSIONS|PROTECTION_FALL|PROTECTION_FIRE|PROTECTION_PROJECTILE|SILK_TOUCH|SWEEPING_EDGE|THORNS|VANISHING_CURSE|WATER_WORKER.closest_to[<context.args.get[1]>]><&c>?"
         - queue clear
       }
     }
@@ -663,330 +1091,3 @@ Mending_Icon:
   display name: <&6>Mending
   lore:
   - <&a>Click here to specify a level.
-
-More_Command:
-  type: command
-  debug: false
-  name: More
-  usage: /More
-  aliases: 
-  - M
-  description: Changes the item stack in your hand to 64 of the item.
-  permission: utility.more
-  permission message: <&7>Sorry, <&6><player.name><&7>. You can't use this command because you don't have the permission <&f>'<permission>'<&7>!
-  script:
-  - if <player.item_in_hand> == i@air {
-    - narrate "<&c>You must have an item in your hand!"
-  }
-  else {
-    - adjust <player.item_in_hand> quantity:<player.item_in_hand.max_stack> save:new_stack
-    - take iteminhand quantity:<player.item_in_hand.quantity>
-    - give <entry[new_stack].result> 
-    - narrate "<&7>Increased <&6><player.item_in_hand.formatted><&7> to <&6><player.item_in_hand.max_stack><&7>!"
-  }
-
-Heal_Command:
-  type: command
-  debug: false
-  name: Heal
-  usage: /Heal (player)
-  aliases: 
-  - H
-  description: Fully restores a player's health and hunger.
-  permission: utility.heal
-  permission message: <&7>Sorry, <&6><player.name><&7>. You can't use this command because you don't have the permission <&f>'<permission>'<&7>!
-  script:
-  - if <context.server> && <context.args.size> == 0 {
-    - narrate "<&c>You must enter a player from console!"
-    - queue clear
-  }
-  - if <context.args.size> >= 1 {
-    - define Target <server.match_offline_player[<context.args.get[1]>]||null>
-    - if <def[Target]> == null {
-      - narrate "<&c>No player can be found by that name!"
-      - queue clear
-    }
-  }
-  else {
-    - heal <player>
-    - feed <player>
-    - narrate "<&7>You have been healed!"
-  }
-  - if <context.server.not> {
-    - if <context.args.size> >= 1 {
-      - heal p@<context.raw_args>
-      - feed p@<context.raw_args>
-      - narrate "<&7>You have been healed!" targets:p@<context.args.get[1]>
-      - narrate "<&7>You have healed <&6><context.args.get[1]><&7>!" targets:<player>
-      - queue clear
-    }
-  }
-
-Inventory_Command:
-  type: command
-  debug: false
-  name: Inventory
-  usage: /Inventory (player)
-  aliases: 
-  - Inv
-  description: Edit a player's inventory.
-  permission: utility.inventory
-  permission message: <&7>Sorry, <&6><player.name><&7>. You can't use this command because you don't have the permission <&f>'<permission>'<&7>!
-  script:
-  - if <context.server> && <context.args.size> == 0 {
-    - narrate "<&c>You must enter a player from console!"
-    - queue clear
-  }
-  - if <context.args.size> >= 1 {
-    - define Target <server.match_offline_player[<context.args.get[1]>]||null>
-    - if <def[Target]> == null {
-      - narrate "<&c>No player can be found by that name!"
-      - queue clear
-    }
-  }
-  else {
-    - narrate "<&c>You must specify a player!"
-    - queue clear
-  }
-  - if <context.server.not> {
-    - if <context.args.size> >= 1 {
-      - narrate "<&7>Checking <&6><context.args.get[1]><&7>!"
-      - define Name p@<context.args.get[1]>
-      - inventory open d:<def[Name].inventory> 
-      - queue clear
-    }
-  }
-
-Gamemode_Command:
-  type: command
-  debug: false
-  name: Gm
-  usage: /Gm (player)
-  aliases: 
-  - Gamemode
-  description: Changes a player's gamemode. Doing the command without any variables will open a menu.
-  permission: utility.gamemode
-  permission message: <&7>Sorry, <&6><player.name><&7>. You can't use this command because you don't have the permission <&f>'<permission>'<&7>!
-  tab complete: 
-  - if !<player.is_op||<context.server>> queue clear 
-  - determine <server.list_online_players.parse[name].filter[starts_with[<context.args.last>]]>
-  script:
-  - if <context.args.size> == 0 {
-    - inventory open d:in@Gamemode_Menu
-    - queue clear
-  }
-  - if <context.args.size> == 1 {
-    - if <context.args.get[1]> == 0 {
-      - adjust <player> gamemode:survival
-      - narrate "<&7>You have switched to <&6>Survival Mode<&7>!"
-      - queue clear
-    }
-    else if <context.args.get[1]> == 1 {
-      - adjust <player> gamemode:creative
-      - narrate "<&7>You have switched to <&6>Creative Mode<&7>!"
-      - queue clear
-    }
-    else if <context.args.get[1]> == 2 {
-      - adjust <player> gamemode:adventure
-      - narrate "<&7>You have switched to <&6>Adventure Mode<&7>!"
-      - queue clear
-    }
-    else if <context.args.get[1]> == 3 {
-      - adjust <player> gamemode:spectator
-      - narrate "<&7>You have switched to <&6>Spectator Mode<&7>!"
-      - queue clear
-    }
-    else {
-      - narrate "<&c>You must specify a valid gamemode!"
-      - queue clear
-    }
-  }
-  - if <context.args.size> == 2 {
-    - define Target <server.match_offline_player[<context.args.get[2]>]||null>
-    - if <def[Target]> == null {
-      - narrate "<&c>No player can be found by that name!"
-      - queue clear
-    }
-    - if <context.args.get[1]> == 0 {
-      - adjust p@<context.args.get[2]> gamemode:survival
-      - narrate "<&7>You have switched to <&6>Survival Mode<&7>!" targets:p@<context.args.get[2]>
-      - narrate "<&7>You have switched <&6><context.args.get[2]><&7> to <&6>Survival Mode<&7>!"
-      - queue clear
-    }
-    else if <context.args.get[1]> == 1 {
-      - adjust p@<context.args.get[2]> gamemode:creative
-      - narrate "<&7>You have switched to <&6>Creative Mode<&7>!" targets:p@<context.args.get[2]>
-      - narrate "<&7>You have switched <&6><context.args.get[2]><&7> to <&6>Creative Mode<&7>!"
-      - queue clear
-    }
-    else if <context.args.get[1]> == 2 {
-      - adjust p@<context.args.get[2]> gamemode:adventure
-      - narrate "<&7>You have switched to <&6>Adventure Mode<&7>!" targets:p@<context.args.get[2]>
-      - narrate "<&7>You have switched <&6><context.args.get[2]><&7> to <&6>Adventure Mode<&7>!"
-      - queue clear
-    }
-    else if <context.args.get[1]> == 3 {
-      - adjust p@<context.args.get[2]> gamemode:spectator
-      - narrate "<&7>You have switched to <&6>Spectator Mode<&7>!" targets:p@<context.args.get[2]>
-      - narrate "<&7>You have switched <&6><context.args.get[2]><&7> to <&6>Spectator Mode<&7>!"
-      - queue clear
-    }
-    else {
-      - narrate "<&c>You must specify a valid gamemode!"
-      - queue clear
-    }
-  }
-
-Gamemode_Menu:
-  type: Inventory
-  inventory: HOPPER
-  title: <&6><&l>Select Gamemode<&co>
-  slots:
-  - "[i@Survival_Icon] [i@Creative_Icon] [i@Adventure_Icon] [i@Spectator_Icon] [i@Exit_Icon]"
-
-Gamemode_Menu_Handler:
-  type: world
-  debug: false
-  events:
-    on player clicks in Gamemode_Menu:
-    - determine cancelled
-    on player drags in Gamemode_Menu:
-    - determine cancelled
-    on player clicks Survival_Icon in Gamemode_Menu:
-    - adjust <player> gamemode:survival
-    - inventory close
-    - narrate "<&7>You have switched to <&6>Survival Mode<&7>!"
-    on player clicks Creative_Icon in Gamemode_Menu:
-    - adjust <player> gamemode:creative
-    - inventory close
-    - narrate "<&7>You have switched to <&6>Creative Mode<&7>!"
-    on player clicks Adventure_Icon in Gamemode_Menu:
-    - adjust <player> gamemode:adventure
-    - inventory close
-    - narrate "<&7>You have switched to <&6>Adventure Mode<&7>!"
-    on player clicks Spectator_Icon in Gamemode_Menu:
-    - adjust <player> gamemode:spectator
-    - inventory close
-    - narrate "<&7>You have switched to <&6>Spectator Mode<&7>!"
-    on player clicks Exit_Icon in Gamemode_Menu:
-    - inventory close
-
-Survival_Icon:
-  type: item
-  material: flint_and_steel
-  display name: <&6>Survival
-  lore:
-  - <&a>Click here to switch.
-
-Creative_Icon:
-  type: item
-  material: obsidian
-  display name: <&6>Creative
-  lore:
-  - <&a>Click here to switch.
-
-Adventure_Icon:
-  type: item
-  material: shield
-  display name: <&6>Adventure
-  lore:
-  - <&a>Click here to switch.
-
-Spectator_Icon:
-  type: item
-  material: eye_of_ender
-  display name: <&6>Spectator
-  lore:
-  - <&a>Click here to switch.
-
-Exit_Icon:
-  type: item
-  material: barrier
-  display name: <&c>Exit
-  lore:
-  - <&a>Click here to exit the menu.
-
-Item_Command:
-  type: command
-  debug: false
-  name: Item
-  usage: /Item (Item) (Amount) (Name) (Lore)
-  aliases: 
-  - I
-  description: Create items with custom name and lore.
-  permission: utility.item
-  permission message: <&7>Sorry, <&6><player.name><&7>. You can't use this command because you don't have the permission <&f>'<permission>'<&7>!
-  tab complete: 
-  - if !<player.is_op||<context.server>> queue clear 
-  - determine <server.list_online_players.parse[name].filter[starts_with[<context.args.last>]]>
-  script:
-  - if <context.args.size> == 0 {
-    - narrate "<&c>You must specify an item!"
-    - queue clear
-  }
-  - if <context.args.size> == 1 {
-    - define Item i@<context.args.get[1]>
-    - if <def[Item].id> == null {
-      - narrate "<&c>No item can be found by that name!"
-      - queue clear
-    }
-    else {
-      - give <def[Item]> quantity:1
-      - narrate "<&7><player.name> created <&f>1<&7> of <&f>[<context.args.get[1]>]" targets:<server.list_online_ops>
-      - queue clear
-    }
-  }
-  - if <context.args.size> == 2 {
-    - define Item i@<context.args.get[1]>
-    - define Number el@<context.args.get[2]>
-    - if <def[Item].id> == null {
-      - narrate "<&c>No item can be found by that name!"
-      - queue clear
-    }
-    -  if <def[Number].as_int> == null {
-      - narrate "<&c>You must specify a proper amount!"
-      - queue clear
-    }
-    else {
-      - give <def[Item]> quantity:<def[Number]>
-      - narrate "<&7><player.name> created <&f><context.args.get[2]><&7> of <&f>[<context.args.get[1]>]" targets:<server.list_online_ops>
-      - queue clear
-    }
-  }
-  - if <context.args.size> == 3 {
-    - define Item i@<context.args.get[1]>
-    - define Number el@<context.args.get[2]>
-    - define Name el@<context.args.get[3].replace[&].with[&ss]>
-    - if <def[Item].id> == null {
-      - narrate "<&c>No item can be found by that name!"
-      - queue clear
-    }
-    -  if <def[Number].as_int> == null {
-      - narrate "<&c>You must specify a proper amount!"
-      - queue clear
-    }
-    else {
-      - give <def[Item]>[display_name=<def[Name].replace[_].with[<&sp>]>] quantity:<def[Number]>
-      - narrate "<&7><player.name> created <&f><context.args.get[2]><&7> of <&f>[<context.args.get[1]>]" targets:<server.list_online_ops>
-      - queue clear
-    }
-  }
-    - if <context.args.size> == 4 {
-    - define Item i@<context.args.get[1]>
-    - define Number el@<context.args.get[2]>
-    - define Name el@<context.args.get[3].replace[&].with[&ss]>
-    - define Lore el@<context.args.get[4].replace[&].with[&ss]>
-    - if <def[Item].id> == null {
-      - narrate "<&c>No item can be found by that name!"
-      - queue clear
-    }
-    -  if <def[Number].as_int> == null {
-      - narrate "<&c>You must specify a proper amount!"
-      - queue clear
-    }
-    else {
-      - give <def[Item]>[display_name=<def[Name].replace[_].with[<&sp>]>;lore=<def[Lore].replace[_].with[<&sp>]>] quantity:<def[Number]>
-      - narrate "<&7><player.name> created <&f><context.args.get[2]><&7> of <&f>[<context.args.get[1]>]" targets:<server.list_online_ops>
-      - queue clear
-    }
-  }
