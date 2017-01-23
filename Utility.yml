@@ -5,9 +5,82 @@ HealthBar:
     on player joins:
     - scoreboard add viewers:<player> id:HealthBar obj:<&c>Health criteria:health displayslot:below_name
 
+Warp:
+  type: command
+  debug: false
+  name: Warp
+  usage: /Warp (create/list/delete) (name) (player)
+  description: Teleports you to a saved location.
+  permission: utility.warp
+  permission message: <&7>Sorry, <&6><player.name><&7>. You can't use this command because you don't have the permission <&f>'<permission>'<&7>!
+  tab complete: 
+  - if !<player.is_op||<context.server>> queue clear 
+  - determine <yaml[Warps].list_keys[Warp_List].filter[starts_with[<context.args.last>]]>
+  script:
+  - if <context.args.size> == 0 {
+    - narrate "<&c>You must specify a warp!"
+    - queue clear
+  }
+  - if !<yaml.list.contains[Warps]> {
+      - yaml "load:/Yml Files/Warps.yml" id:Warps
+  }
+  - if <context.args.size> == 1 {
+    - if <context.args.get[1]> == list {
+      - narrate '<&6>Warps<&co> <&f><yaml[Warps].list_keys[Warp_List].formatted>'
+      - queue clear
+    }
+    else if <context.args.get[1]> == create {
+      - narrate '<&c>You must enter a name for the warp!'
+      - queue clear
+    }
+    else if <context.args.get[1]> == delete {
+      - narrate '<&c>You must enter the name of the warp that you want to delete!'
+      - queue clear
+    }
+    else if <yaml[Warps].contains[Warp_List.<context.args.get[1]>]> {
+      - teleport <player> <yaml[Warps].read[Warp_List.<context.args.get[1]>]>
+      - narrate '<&7>You have warped to <&6><context.args.get[1]><&7>!'
+      - queue clear
+    }
+    else {
+      - narrate '<&c>No warp with that name exists!'
+      - queue clear
+    }
+  }
+  - if <context.args.size> == 2 {
+    - if <context.args.get[1]> == create {
+      - if <yaml[Warps].list_keys[Warp_List].contains[<context.args.get[2]>]> {
+        - narrate "<&c>That warp already exists!"
+        - queue clear
+     }
+      - yaml id:Warps set Warp_List.<context.args.get[2]>:<player.location>
+      - yaml savefile:Warps.yml id:Warps
+      - narrate '<&7>You have created the warp <&6><context.args.get[2]> <&7>at <&6><player.location.simple><&7>!'
+      - queue clear
+    }
+    else if <context.args.get[1]> == delete {
+      - yaml id:Warps set Warp_List.<context.args.get[2]>:!
+      - yaml savefile:Warps.yml id:Warps
+      - narrate '<&7>You deleted the warp <&6><context.args.get[2]><&7>!'
+      - queue clear
+    }
+    else if <server.list_online_players.contains[<context.args.get[2]>]>
+      - define Target <server.match_offline_player[<context.args.get[2]>]||null>
+      - if <def[Target]> == null {
+        - narrate "<&c>No player can be found by that name!"
+        - queue clear
+      }
+      else if <context.server.not> {
+        - teleport p@<server.list_online_players.closest_to[<context.args.get[2]>]> <yaml[Warps].read[Warp_List.<context.args.get[1]>]>
+        - narrate "<&7>You have been warped to <&6><context.args.get[1]><&7>!" targets:p@<context.args.get[2]>
+        - narrate "<&7>You have warped <&6><server.list_online_players.closest_to[<context.args.get[2]>]> <&7>to <&6><context.args.get[1]><&7>!" targets:<player>
+        - queue clear
+      }
+    }
+
 Mob:
   type: command
-  debug: true
+  debug: false
   name: Mob
   usage: /Mob (entity) (amount) (location) or /Mob list
   description: Spawn entities or display a list of spawnable entities.
@@ -94,11 +167,11 @@ Heal_Command:
     }
   }
 
-Info:
+Data:
   type: command
   debug: false
-  name: Info
-  usage: /Info (player)
+  name: Data
+  usage: /Data (player)
   description: Display a bunch of information about a player
   permission: utility.info
   permission message: <&7>Sorry, <&6><player.name><&7>. You can't use this command because you don't have the permission <&f>'<permission>'<&7>!
@@ -121,8 +194,8 @@ Info:
       - ^narrate '<&2><&l>Info<&co> <&6><context.args.get[1]>'
       - ^narrate '<&e>Online<&co> <&7><def[player].is_online>'
       - ^narrate '<&e>Banned<&co> <&7><def[player].is_banned>'
-      - ^narrate '<&e>Location<&co> <&7><def[player].location.simple.formatted>'
-      - ^narrate '<&e>IP<&co> <&7><def[player].ip>'
+      - ^narrate '<&e>Location<&co> <&7><def[player].location.simple>'
+      - ^narrate '<&e>IP<&co> <&7><def[player].ip.address>'
       - ^narrate '<&e>UUID<&co> <&7><def[player].uuid>'
       - queue clear
     }
@@ -754,7 +827,7 @@ Tool_Enchantments_Menu:
   title: <&6><&l>Select Enchantment<&co>
   size: 9
   slots:
-  - "[i@Unbreaking_Icon] [i@Efficiency_Icon] [i@Fortune_Icon] [i@Silk_Touch_Icon] [i@Lure_Icon] [i@Luck_Of_The_Sea_Icon] [] [i@Back_Icon] [i@Exit_Icon]"
+  - "[i@Unbreaking_Icon] [i@Fortune_Icon] [i@Efficiency_Icon] [i@Silk_Touch_Icon] [i@Lure_Icon] [i@Luck_Of_The_Sea_Icon] [] [i@Back_Icon] [i@Exit_Icon]"
 
 Misc_Enchantments_Menu:
   type: Inventory
@@ -903,17 +976,17 @@ Lure_Icon:
   lore:
   - <&a>Click here to select an enchantment.
 
-Efficiency_Icon:
-  type: item
-  material: enchanted_book
-  display name: <&6>
-  lore:
-  - <&a>Click here to select an enchantment.
-
 Sharpness_Icon:
   type: item
   material: enchanted_book
   display name: <&6>Sharpness
+  lore:
+  - <&a>Click here to specify a level.
+
+Efficiency_Icon:
+  type: item
+  material: enchanted_book
+  display name: <&6>Efficiency
   lore:
   - <&a>Click here to specify a level.
 
