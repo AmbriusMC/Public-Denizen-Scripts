@@ -1,0 +1,84 @@
+Trade:
+  type: command
+  debug: true
+  name: Trade
+  usage: /Trade (player)
+  description: Opens a trading window with another player.
+  permission: utility.trade
+  permission message: <&7>Sorry, <&6><player.name><&7>. You can't use this command because you don't have the permission <&f>'<permission>'<&7>!
+  tab complete: 
+  - if !<player.is_op||<context.server>> queue clear 
+  - determine <server.list_online_players.parse[name].filter[starts_with[<context.args.last>]]>
+  script:
+  - if <context.args.size> == 0 {
+    - narrate '<&c>You must specify a player!'
+    - queue clear
+  }
+  - if <context.args.size> >= 1 {
+    - if <context.args.get[1]> == accept {
+      - if <player.has_flag[Trading_Request]> {
+        - flag player Trading_Request:Accepted duration:5s
+        - flag player Trading:2
+        - inventory open d:in@Trading_<player.name>
+        - queue clear
+      }
+      else {
+        - narrate "<&7>You have no pending trade requests!"
+      }
+    }
+    - define Target <server.match_offline_player[<context.args.get[1]>]||null>
+    - if <def[Target]> == null {
+      - narrate "<&c>No player can be found by that name!"
+      - queue clear
+    }
+    else {
+      - define Player p@<context.args.get[1]>
+      - note 'in@generic[size=36;title=<&a><player.name><&sp><&7>trading<&sp>with<&sp><&a><def[Player].name>;contents=li@i@air|i@air|i@air|i@air|i@66|i@air|i@air|i@air|i@air|i@air|i@air|i@air|i@air|i@66|i@air|i@air|i@air|i@air|i@air|i@air|i@air|i@air|i@66|i@air|i@air|i@air|i@air|i@air|i@air|i@air|i@air|i@66]' as:Trading_<def[Player].name>
+      - flag <def[Player]> Trading_Request:Pending duration:15s
+      - narrate "<&7>You have sent a trade request to <&6><context.args.get[1]><&7>!"
+      - narrate "<&7>You have a pending trade request from <&6><player.name><&7>! Type <&a>/Trade <&7>accept to open a trade window." targets:<def[Player]>
+      - while <def[Player].has_flag[Trading_Request]> {
+        - if <def[Player].flag[Trading_Request]> == Accepted {
+          - flag player Trading:1
+          - inventory open d:in@Trading_<def[Player].name>
+          - flag <def[Player]> Trading_Request:!
+          - queue clear
+        }
+        else {
+          - wait 0.5s
+        }
+      }
+      - note remove as:Trading_<def[Player]>
+      - narrate "<&7>The trade request has expired!" targets:<def[Player]>
+      - queue clear
+    }
+  }
+
+Trade_Handler:
+  type: world
+  debug: true
+  events:
+    on player closes inventory:
+    - if <player.has_flag[Trading]> {
+      - flag player Trading:!
+      - narrate "<context.inventory>"
+      - queue clear
+    }
+    on player clicks in inventory:
+    - if !<player.has_flag[Trading]> {
+      - queue clear
+    }
+    else if <player.flag[Trading]> == 1 {
+      - if <context.raw_slot.contains_any[5|6|7|8|9|14|15|16|17|18|23|24|25|26|27|32|33|34|35|36]> {
+        - determine passively cancelled
+        - narrate '<context.raw_slot>'
+      }
+    }
+
+
+
+
+
+
+
+
