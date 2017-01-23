@@ -1,0 +1,357 @@
+###########-      -###########
+###########- Menu -###########
+###########-      -###########
+
+Mount_Menu:
+  type: Inventory
+  title: <&6><&l>Select A Mount
+  size: 9
+  slots:
+  - "[i@Old_Donkey_Icon] [i@Sturdy_Mustang_Icon] [i@Swift_Highlander_Icon] [i@Agile_Dressage_Performer_Icon] [i@Skittish_Forest_Horse_Icon] [i@Armored_Thoroughbred_Icon] [i@Black_War_Stallion_Icon] [i@Majestic_Purebred_Icon] [i@Ghastly_Deathcharger_Icon]"
+
+###########-       -###########
+###########- Icons -###########
+###########-       -###########
+
+Old_Donkey_Icon:
+  type: item
+  material: 398
+  display name: <&a><&l>Old Donkey
+  lore:
+  - <&6>Summon a stubborn old donkey.
+  - <&7>
+  - <&a>Speed: <&e>Very Slow
+  - <&a>Jump Strength: <&e> Very Low
+  - <&a>Armor: <&e>None
+
+Sturdy_Mustang_Icon:
+  type: item
+  material: 391
+  display name: <&a><&l>Sturdy Mustang
+  lore:
+  - <&6>Summon a sturdy mustang previously used for carriages.
+  - <&7>
+  - <&a>Speed: <&e>Slow
+  - <&a>Jump Strength: <&e>Low
+  - <&a>Armor: <&e>None
+
+Swift_Highlander_Icon:
+  type: item
+  material: 296
+  display name: <&a><&l>Swift Highlander
+  lore:
+  - <&6>Summon a swift horse from the nothern regions.
+  - <&7>
+  - <&a>Speed: <&e>Medium
+  - <&a>Jump Strength: <&e>Low
+  - <&a>Armor: <&e>None
+
+Agile_Dressage_Performer_Icon:
+  type: item
+  material: 85
+  display name: <&a><&l>Agile Dressage Performer
+  lore:
+  - <&6>Summon an agile horse, that excels at jumping.
+  - <&7>
+  - <&a>Speed: <&e>Low
+  - <&a>Jump Strength: <&e>High
+  - <&a>Armor: <&e>None
+
+Skittish_Forest_Horse_Icon:
+  type: item
+  material: 18
+  display name: <&a><&l>Skittish Forest Horse
+  lore:
+  - <&6>Summon a skittish horse from the forest.
+  - <&7>
+  - <&a>Speed: <&e>Medium
+  - <&a>Jump Strength: <&e>Medium
+  - <&a>Armor: <&e>None
+
+Armored_Thoroughbred_Icon:
+  type: item
+  material: 417
+  display name: <&a><&l>Armored Thoroughbred
+  lore:
+  - <&6>Summon an armored horse commonly used among
+  - <&6>the city guards.
+  - <&7>
+  - <&a>Speed: <&e>Fast
+  - <&a>Jump Strength: <&e>Low
+  - <&a>Armor: <&e>Iron
+
+Black_War_Stallion_Icon:
+  type: item
+  material: 418
+  display name: <&a><&l>Black War Stallion
+  lore:
+  - <&6>Summon a swift young stallion, often used by
+  - <&6>the nobles in times of war.
+  - <&7>
+  - <&a>Speed: <&e>Fast
+  - <&a>Jump Strength: <&e>Medium
+  - <&a>Armor: <&e>Gold
+
+Majestic_Purebred_Icon:
+  type: item
+  material: 419
+  display name: <&a><&l>Majestic Purebred
+  lore:
+  - <&6>Summon a majestic horse worthy of a king.
+  - <&7>
+  - <&a>Speed: <&e>Very Fast
+  - <&a>Jump Strength: <&e>High
+  - <&a>Armor: <&e>Diamond
+
+Ghastly_Deathcharger_Icon:
+  type: item
+  material: 352
+  display name: <&a><&l>Ghastly Deathcharger
+  lore:
+  - <&6>Summon a terrifying horse only mentioned
+  - <&6>in fables. 
+  - <&7>
+  - <&a>Speed: <&e>Very Fast
+  - <&a>Jump Strength: <&e>Very Fast
+  - <&a>Armor: <&e>None
+
+
+###########-        -###########
+###########- Horses -###########
+###########-        -###########
+
+Old_Donkey:
+  type: entity
+  entity_type: e@horse
+  custom_name: <&6><&l>Old Donkey
+  color: BROWN|NONE|DONKEY
+  tame: true
+  invulnerable: true
+  age: adult
+
+Sturdy_Mustang:
+  type: entity
+  entity_type: e@horse
+  custom_name: <&6><&l>Sturdy Mustang
+  tame: true
+  invulnerable: true
+  age: adult
+  color: CHESTNUT|WHITEFIELD|HORSE
+  inventory_contents: i@saddle
+  speed: 0.2
+  jump_strength: 0.6
+
+Swift_Highlander:
+  type: entity
+  entity_type: e@horse
+  custom_name: <&6><&l>Swift Highlander
+  tame: true
+  invulnerable: true
+  age: adult
+  color: DARK_BROWN|BLACK_DOTS|HORSE
+  inventory_contents: i@saddle
+  speed: 0.25
+  jump_strength: 0.6
+
+Agile_Dressage_Performer:
+  type: entity
+  entity_type: e@horse
+  custom_name: <&6><&l>Agile Dressage Performer
+  tame: true
+  invulnerable: true
+  age: adult
+  color: GRAY|WHITE|HORSE
+  inventory_contents: i@saddle
+  speed: 0.2
+  jump_strength: 0.9
+
+Skittish_Forest_Horse:
+  type: entity
+  entity_type: e@horse
+  custom_name: <&6><&l>Skittish Forest Horse
+  tame: true
+  invulnerable: true
+  age: adult
+  color: CREAMY|BLACK_DOTS|HORSE
+  inventory_contents: i@saddle
+  speed: 0.25
+  jump_strength: 0.75
+
+Armored_Thoroughbred:
+  type: entity
+  entity_type: e@horse
+  custom_name: <&6><&l>Armored Thoroughbred
+  tame: true
+  invulnerable: true
+  age: adult
+  color: CHESTNUT|BLACK_DOTS|HORSE
+  inventory_contents: i@saddle|i@iron_barding
+  speed: 0.3
+  jump_strength: 0.6
+
+Black_War_Stallion:
+  type: entity
+  entity_type: e@horse
+  custom_name: <&6><&l>Black War Stallion
+  tame: true
+  invulnerable: true
+  age: adult
+  color: BLACK|NONE|HORSE
+  inventory_contents: i@saddle|i@gold_barding
+  speed: 0.3
+  jump_strength: 0.75
+
+Majestic_Purebred:
+  type: entity
+  entity_type: e@horse
+  custom_name: <&6><&l>Majestic Purebred
+  tame: true
+  invulnerable: true
+  age: adult
+  color: WHITE|WHITEFIELD|HORSE
+  inventory_contents: i@saddle|i@diamond_barding
+  speed: 0.35
+  jump_strength: 0.9
+
+Ghastly_Deathcharger:
+  type: entity
+  entity_type: e@horse
+  custom_name: <&c><&l>Ghastly Deathcharger
+  tame: true
+  invulnerable: true
+  age: adult
+  color: WHITE|WHITE|SKELETON_HORSE
+  inventory_contents: i@saddle
+  speed: 0.35
+  jump_strength: 1
+
+###########-              -###########
+###########- World Events -###########
+###########-              -###########
+
+Mount_Handler:
+  type: world
+  events:
+    on player exits vehicle:
+    - if <context.vehicle.has_flag[Mount]> {
+      - playeffect <player.location> effect:FIREWORKS_SPARK quantity:20
+      - remove <context.vehicle>
+    }
+    on player damaged by player:
+    - if <context.damage> >= 2 {
+      - flag <context.entity> MountPvP duration:30s
+      - flag <context.damager> MountPvP duration:30s
+      - if <context.entity.is_inside_vehicle> {
+        - if <context.entity.vehicle.has_flag[Mount]> {
+          - playeffect <context.entity.location> effect:FIREWORKS_SPARK quantity:20
+          - remove <context.entity.vehicle>
+        }
+      }
+      - if <context.damager.is_inside_vehicle> {
+        - if <context.damager.vehicle.has_flag[Mount]> {
+          - playeffect <context.damager.location> effect:FIREWORKS_SPARK quantity:20
+          - remove <context.damager.vehicle>
+        }
+      }
+    }
+    on player clicks in inventory:
+    - if <context.inventory.inventory_type> == HORSE {
+      - if <context.slot> == 1 {
+        - if <context.item> == i@saddle {
+          - determine passively cancelled
+        }
+      }
+      - if <context.slot> == 2 {
+        - if <context.item> == i@iron_barding {
+          - determine passively cancelled
+        }
+        - if <context.item> == i@gold_barding {
+          - determine passively cancelled
+        }
+        - if <context.item> == i@diamond_barding {
+          - determine passively cancelled
+        }
+      }
+    }
+    on player drags in inventory:
+    - if <context.inventory.inventory_type> == HORSE {
+      - if <context.slot> == 1 {
+        - if <context.item> == i@saddle {
+          - determine passively cancelled
+        }
+      }
+      - if <context.slot> == 2 {
+        - if <context.item> == i@iron_barding {
+          - determine passively cancelled
+        }
+        - if <context.item> == i@gold_barding {
+          - determine passively cancelled
+        }
+        - if <context.item> == i@diamond_barding {
+          - determine passively cancelled
+        }
+      }
+    }
+
+Mount_Menu_Handler:
+  type: world
+  events:
+    on player clicks in Mount_Menu:
+    - determine cancelled
+    on player drags in Mount_Menu:
+    - determine cancelled
+    on player clicks Old_Donkey_Icon in Mount_Menu:
+    - mount <player>|<e@Old_Donkey> 
+    - flag <player.vehicle> Mount:<player.name>
+    - inventory close
+    on player clicks Sturdy_Mustang_Icon in Mount_Menu:
+    - mount <player>|<e@Sturdy_Mustang> 
+    - flag <player.vehicle> Mount:<player.name>
+    - inventory close
+    on player clicks Swift_Highlander_Icon in Mount_Menu:
+    - mount <player>|<e@Swift_Highlander> 
+    - flag <player.vehicle> Mount:<player.name>
+    - inventory close
+    on player clicks Agile_Dressage_Performer_Icon in Mount_Menu:
+    - mount <player>|<e@Agile_Dressage_Performer> 
+    - flag <player.vehicle> Mount:<player.name>
+    - inventory close
+    on player clicks Skittish_Forest_Horse_Icon in Mount_Menu:
+    - mount <player>|<e@Skittish_Forest_Horse> 
+    - flag <player.vehicle> Mount:<player.name>
+    - inventory close
+    on player clicks Armored_Thoroughbred_Icon in Mount_Menu:
+    - mount <player>|<e@Armored_Thoroughbred> 
+    - flag <player.vehicle> Mount:<player.name>
+    - inventory close
+    on player clicks Black_War_Stallion_Icon in Mount_Menu:
+    - mount <player>|<e@Black_War_Stallion> 
+    - flag <player.vehicle> Mount:<player.name>
+    - inventory close
+    on player clicks Majestic_Purebred_Icon in Mount_Menu:
+    - mount <player>|<e@Majestic_Purebred> 
+    - flag <player.vehicle> Mount:<player.name>
+    - inventory close
+    on player clicks Ghastly_Deathcharger_Icon in Mount_Menu:
+    - mount <player>|<e@Ghastly_Deathcharger> 
+    - flag <player.vehicle> Mount:<player.name>
+    - inventory close
+
+###########-          -###########
+###########- Commands -###########
+###########-          -###########
+
+Mount_Command:
+  type: Command 
+  name: Mount
+  usage: /Mount
+  description: 
+  script:
+    - if !<player.has_flag[MountPvP]> {
+      - inventory open d:in@Mount_Menu
+      - queue clear
+    }
+    else {
+    - narrate "<&c>You are currently in combat for another <player.flag[MountPvP].expiration.formatted>."
+    }
+
