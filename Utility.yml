@@ -52,15 +52,15 @@ Warp:
       - if <yaml[Warps].list_keys[Warp_List].contains[<context.args.get[2]>]> {
         - narrate "<&c>That warp already exists!"
         - queue clear
-     }
+      }
       - yaml id:Warps set Warp_List.<context.args.get[2]>:<player.location>
-      - yaml savefile:Warps.yml id:Warps
+      - yaml 'savefile:/Yml Files/Warps.yml' id:Warps
       - narrate '<&7>You have created the warp <&6><context.args.get[2]> <&7>at <&6><player.location.simple><&7>!'
       - queue clear
     }
     else if <context.args.get[1]> == delete {
       - yaml id:Warps set Warp_List.<context.args.get[2]>:!
-      - yaml savefile:Warps.yml id:Warps
+      - yaml 'savefile:/Yml Files/Warps.yml' id:Warps
       - narrate '<&7>You deleted the warp <&6><context.args.get[2]><&7>!'
       - queue clear
     }
@@ -80,9 +80,9 @@ Warp:
 
 Mob:
   type: command
-  debug: false
+  debug: true
   name: Mob
-  usage: /Mob (entity) (amount) (location) or /Mob list
+  usage: /Mob (entity/list) (amount) (x,y,z,World)
   description: Spawn entities or display a list of spawnable entities.
   permission: utility.mob
   permission message: <&7>Sorry, <&6><player.name><&7>. You can't use this command because you don't have the permission <&f>'<permission>'<&7>!
@@ -96,7 +96,8 @@ Mob:
   }
   - if <context.args.size> == 1 {
     - if <li@BAT|BLAZE|CAVE_SPIDER|CHICKEN|COW|CREEPER|DONKEY|ELDER_GUARDIAN|ENDER_DRAGON|ENDERMAN|ENDERMITE|EVOKER|GHAST|GIANT|GIANT|HORSE|HUSK|IRON_GOLEM|LLAMA|MAGMA_CUBE|MULE|MUSHROOM_COW|OCELOT|PIG|PIG_ZOMBIE|POLAR_BEAR|RABBIT|SHEEP|SHULKER|SILVERFISH|SKELETON|SKELETON_HORSE|SLIME|SNOWMAN|SPIDER|SQUID|STRAY|VEX|VILLAGER|VINDICATOR|WITCH|WITHER|WITHER_SKELETON|WOLF|ZOMBIE|ZOMBIE_HORSE|ZOMBIE_VILLAGER.contains[<context.args.get[1]>]> {
-      - spawn e@<context.args.get[1]> <player.location>
+      - spawn e@<context.args.get[1]> <player.location.cursor_on[50].add[0,1,0].center>
+      - narrate "<&7>You have spawned <&6>1 <context.args.get[1]> <&7>at <&6><player.location.cursor_on[50].add[0,1,0].simple><&7>!"
       - queue clear
     }
     else if <context.args.get[1]> == list {
@@ -104,10 +105,55 @@ Mob:
       - queue clear
     }
     else {
-      - narrate '<&c>This entity doesn't exist. Did you mean<&co> <&6><li@BAT|BLAZE|CAVE_SPIDER|CHICKEN|COW|CREEPER|DONKEY|ELDER_GUARDIAN|ENDER_DRAGON|ENDERMAN|ENDERMITE|EVOKER|GHAST|GIANT|GIANT|HORSE|HUSK|IRON_GOLEM|LLAMA|MAGMA_CUBE|MULE|MUSHROOM_COW|OCELOT|PIG|PIG_ZOMBIE|POLAR_BEAR|RABBIT|SHEEP|SHULKER|SILVERFISH|SKELETON|SKELETON_HORSE|SLIME|SNOWMAN|SPIDER|SQUID|STRAY|VEX|VILLAGER|VINDICATOR|WITCH|WITHER|WITHER_SKELETON|WOLF|ZOMBIE|ZOMBIE_HORSE|ZOMBIE_VILLAGER.closest_to[<context.args.get[1]>'
+      - narrate "<&c>This entity doesn't exist! <&7>Did you mean<&co> <&6><li@BAT|BLAZE|CAVE_SPIDER|CHICKEN|COW|CREEPER|DONKEY|ELDER_GUARDIAN|ENDER_DRAGON|ENDERMAN|ENDERMITE|EVOKER|GHAST|GIANT|GIANT|HORSE|HUSK|IRON_GOLEM|LLAMA|MAGMA_CUBE|MULE|MUSHROOM_COW|OCELOT|PIG|PIG_ZOMBIE|POLAR_BEAR|RABBIT|SHEEP|SHULKER|SILVERFISH|SKELETON|SKELETON_HORSE|SLIME|SNOWMAN|SPIDER|SQUID|STRAY|VEX|VILLAGER|VINDICATOR|WITCH|WITHER|WITHER_SKELETON|WOLF|ZOMBIE|ZOMBIE_HORSE|ZOMBIE_VILLAGER.closest_to[<context.args.get[1]>]>"
       - queue clear 
     }
   }
+  - if <context.args.size> == 2 {
+    - if !<li@BAT|BLAZE|CAVE_SPIDER|CHICKEN|COW|CREEPER|DONKEY|ELDER_GUARDIAN|ENDER_DRAGON|ENDERMAN|ENDERMITE|EVOKER|GHAST|GIANT|GIANT|HORSE|HUSK|IRON_GOLEM|LLAMA|MAGMA_CUBE|MULE|MUSHROOM_COW|OCELOT|PIG|PIG_ZOMBIE|POLAR_BEAR|RABBIT|SHEEP|SHULKER|SILVERFISH|SKELETON|SKELETON_HORSE|SLIME|SNOWMAN|SPIDER|SQUID|STRAY|VEX|VILLAGER|VINDICATOR|WITCH|WITHER|WITHER_SKELETON|WOLF|ZOMBIE|ZOMBIE_HORSE|ZOMBIE_VILLAGER.contains[<context.args.get[1]>]> {
+      - narrate "<&c>This entity doesn't exist! <&7>Did you mean<&co> <&6><li@BAT|BLAZE|CAVE_SPIDER|CHICKEN|COW|CREEPER|DONKEY|ELDER_GUARDIAN|ENDER_DRAGON|ENDERMAN|ENDERMITE|EVOKER|GHAST|GIANT|GIANT|HORSE|HUSK|IRON_GOLEM|LLAMA|MAGMA_CUBE|MULE|MUSHROOM_COW|OCELOT|PIG|PIG_ZOMBIE|POLAR_BEAR|RABBIT|SHEEP|SHULKER|SILVERFISH|SKELETON|SKELETON_HORSE|SLIME|SNOWMAN|SPIDER|SQUID|STRAY|VEX|VILLAGER|VINDICATOR|WITCH|WITHER|WITHER_SKELETON|WOLF|ZOMBIE|ZOMBIE_HORSE|ZOMBIE_VILLAGER.closest_to[<context.args.get[1]>]>"
+      - queue clear
+    }
+    - if <context.args.get[2]> matches number {
+      - repeat <context.args.get[2]> {
+        - spawn e@<context.args.get[1]> <player.location.cursor_on[50].add[0,1,0].center>
+      }
+      - narrate "<&7>You have spawned <&6><context.args.get[2]> <context.args.get[1]> <&7>at <&6><player.location.cursor_on[50].add[0,1,0].simple><&7>!"
+      - queue clear
+    }
+    else {
+      - narrate '<&c>You must specify a valid number!'
+      - queue clear
+    }
+  }
+  - if <context.args.size> == 3 {
+    - if !<li@BAT|BLAZE|CAVE_SPIDER|CHICKEN|COW|CREEPER|DONKEY|ELDER_GUARDIAN|ENDER_DRAGON|ENDERMAN|ENDERMITE|EVOKER|GHAST|GIANT|GIANT|HORSE|HUSK|IRON_GOLEM|LLAMA|MAGMA_CUBE|MULE|MUSHROOM_COW|OCELOT|PIG|PIG_ZOMBIE|POLAR_BEAR|RABBIT|SHEEP|SHULKER|SILVERFISH|SKELETON|SKELETON_HORSE|SLIME|SNOWMAN|SPIDER|SQUID|STRAY|VEX|VILLAGER|VINDICATOR|WITCH|WITHER|WITHER_SKELETON|WOLF|ZOMBIE|ZOMBIE_HORSE|ZOMBIE_VILLAGER.contains[<context.args.get[1]>]> {
+      - narrate "<&c>This entity doesn't exist! <&7>Did you mean<&co> <&6><li@BAT|BLAZE|CAVE_SPIDER|CHICKEN|COW|CREEPER|DONKEY|ELDER_GUARDIAN|ENDER_DRAGON|ENDERMAN|ENDERMITE|EVOKER|GHAST|GIANT|GIANT|HORSE|HUSK|IRON_GOLEM|LLAMA|MAGMA_CUBE|MULE|MUSHROOM_COW|OCELOT|PIG|PIG_ZOMBIE|POLAR_BEAR|RABBIT|SHEEP|SHULKER|SILVERFISH|SKELETON|SKELETON_HORSE|SLIME|SNOWMAN|SPIDER|SQUID|STRAY|VEX|VILLAGER|VINDICATOR|WITCH|WITHER|WITHER_SKELETON|WOLF|ZOMBIE|ZOMBIE_HORSE|ZOMBIE_VILLAGER.closest_to[<context.args.get[1]>]>"
+      - queue clear
+    }
+    - define Location l@<context.args.get[3]>
+    - if <def[Location].simple.formatted> == null {
+      - narrate "<&c>You must use the following location format<&co> <&6>x,y,z,world"
+      - queue clear
+    }
+    - if <context.args.get[2]> matches number {
+      - define Location l@<context.args.get[3]>
+      - repeat <context.args.get[2]> {
+        - spawn e@<context.args.get[1]> <def[Location].center>
+      }
+      - narrate "<&7>You have spawned <&6><context.args.get[2]> <context.args.get[1]> <&7>at <&6><def[Location].simple><&7>!"
+      - queue clear
+    }
+    else {
+      - narrate '<&c>You must specify a valid number!'
+      - queue clear
+    }
+  }
+  - if <context.args.size> >= 4 {
+    - narrate "<&c>Too many arguments! <&f>/Mob (entity/list) (amount) (x,y,z,World)"
+    - queue clear
+  }
+
 
 More_Command:
   type: command
@@ -449,7 +495,7 @@ Item_Command:
     }
     else {
       - give <def[Item]> quantity:1
-      - narrate "<&7><player.name> created <&f>1<&7> of <&f>[<context.args.get[1]>]" targets:<server.list_online_ops>
+      - narrate "<&7><player.name> created <&6>1<&7> of <&6><context.args.get[1]><&7>!" targets:<server.list_online_ops>
       - queue clear
     }
   }
@@ -466,7 +512,7 @@ Item_Command:
     }
     else {
       - give <def[Item]> quantity:<def[Number]>
-      - narrate "<&7><player.name> created <&f><context.args.get[2]><&7> of <&f>[<context.args.get[1]>]" targets:<server.list_online_ops>
+      - narrate "<&7><player.name> created <&6><context.args.get[2]><&7> of <&6><context.args.get[1]><&7>!" targets:<server.list_online_ops>
       - queue clear
     }
   }
