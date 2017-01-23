@@ -1,0 +1,57 @@
+Item_Generator:
+  type: task
+  script:
+    - if !<yaml.list.contains[Item_Variables]> {
+      - yaml "load:/Yml Files/Item_Variables.yml" id:Item_Variables
+    }
+    - ^define Rarity_Roll <util.random.int[1].to[100]>
+    - ^define Attributes <yaml[Item_Variables].read[Attributes.Attribute_List]>
+    - ^define Class_List <yaml[Item_Variables].read[Classes.Class_List]>
+    - ^define Class <def[Class_List].random>
+    - ^define Item_List <yaml[Item_Variables].read[Class_Armor.<def[Class]>]>
+    - ^define Item <def[Item_List].random>
+    - ^define Item_Name <yaml[Item_Variables].read[Item_Names.<def[Item]>]>
+    - if <def[Rarity_Roll]> >= 1 && <def[Rarity_Roll]> <= 51 {
+      - define Rarity_Name <yaml[Item_Variables].read[Rarity_Names.Common]>
+      - give i@<def[Item]>[display_name=<&8><&l><def[Rarity_Name].random><&sp><def[Item_Name].random>;lore=<&7>Tier<&co><&sp><&8>Common|<&7>Class<&sp>Req<&co><&sp>&<def[Class]>|<&sp>|<&7><def[Attributes].random><&co><&sp><&a>+<util.random.int[1].to[8]>]
+      - queue clear
+    }
+    else if <def[Rarity_Roll]> >= 51 && <def[Rarity_Roll]> <= 81 {
+      - define Rarity_Name <yaml[Item_Variables].read[Rarity_Names.Rare]>
+      - if <util.random.int[1].to[2]> == 2 {
+        - define Main_Attribute <util.random.int[3].to[13]>
+        - define Second_Attribute <util.random.int[1].to[<el@14.sub_int[<def[Main_Attribute]>]>]>
+        - define Attribute_1 <def[Attributes].random>
+        - give i@<def[Item]>[display_name=<&a><&l><def[Rarity_Name].random><&sp><def[Item_Name].random>;lore=<&7>Tier<&co><&sp><&a>Rare|<&7>Class<&sp>Req<&co><&sp>&<def[Class]>|<&sp>|<&7><def[Attribute_1]><&co><&sp><&a>+<def[Main_Attribute]>|<&7><def[Attributes].exclude[<def[Attribute_1]>].random><&co><&sp><&a>+<def[Second_Attribute]>]
+      } 
+      else {
+        - define Rarity_Name <yaml[Item_Variables].read[Rarity_Names.Rare]>
+        - give i@<def[Item]>[display_name=<&a><&l><def[Rarity_Name].random><&sp><def[Item_Name].random>;lore=<&7>Tier<&co><&sp><&a>Rare|<&7>Class<&sp>Req<&co><&sp>&<def[Class]>|<&sp>|<&7><def[Attributes].random><&co><&sp><&a>+<util.random.int[4].to[14]>]
+        - queue clear
+      } 
+    }
+    else if <def[Rarity_Roll]> >= 81 && <def[Rarity_Roll]> <= 95 {
+      - define Rarity_Name <yaml[Item_Variables].read[Rarity_Names.Superior]>
+      - define Main_Attribute <util.random.int[5].to[19]>
+      - define Second_Attribute <util.random.int[1].to[<el@20.sub_int[<def[Main_Attribute]>]>]>
+      - define Attribute_1 <def[Attributes].random>
+      - give i@<def[Item]>[display_name=<&9><&l><def[Rarity_Name].random><&sp><def[Item_Name].random>;lore=<&7>Tier<&co><&sp><&9>Superior|<&7>Class<&sp>Req<&co><&sp>&<def[Class]>|<&sp>|<&7><def[Attribute_1]><&co><&sp><&a>+<def[Main_Attribute]>|<&7><def[Attributes].exclude[<def[Attribute_1]>].random><&co><&sp><&a>+<def[Second_Attribute]>]
+    }
+    else if <def[Rarity_Roll]> >= 96 && <def[Rarity_Roll]> <= 100 {
+      - define Rarity_Name <yaml[Item_Variables].read[Rarity_Names.Epic]>
+      - if <util.random.int[1].to[2]> == 2 {
+        - define Main_Attribute <util.random.int[8].to[24]>
+        - define Second_Attribute <util.random.int[2].to[<el@25.sub_int[<def[Main_Attribute]>]>]>
+        - define Third_Attribute <util.random.int[1].to[<el@26.sub_int[<el@%Main_Attribute%.add_int[%Second_Attribute%]>]>]>
+        - define Attribute_1 <def[Attributes].random>
+        - define Attribute_2 <def[Attributes].exclude[<def[Attribute_1]>].random>
+        - give i@<def[Item]>[display_name=<&5><&l><def[Rarity_Name].random><&sp><def[Item_Name].random>;lore=<&7>Tier<&co><&sp><&5>Epic|<&7>Class<&sp>Req<&co><&sp>&<def[Class]>|<&sp>|<&7><def[Attribute_1]><&co><&sp><&a>+<def[Main_Attribute]>|<&7><def[Attribute_2]><&co><&sp><&a>+<def[Second_Attribute]>|<&7><def[Attributes].exclude[<def[Attribute_1]>|<def[Attribute_2]>].random><&co><&sp><&a>+<def[Third_Attribute]>]
+      } 
+      else {
+        - define Rarity_Name <yaml[Item_Variables].read[Rarity_Names.Superior]>
+        - define Main_Attribute <util.random.int[10].to[25]>
+        - define Second_Attribute <util.random.int[1].to[<el@26.sub_int[<def[Main_Attribute]>]>]>
+        - define Attribute_1 <def[Attributes].random>
+        - give i@<def[Item]>[display_name=<&5><&l><def[Rarity_Name].random><&sp><def[Item_Name].random>;lore=<&7>Tier<&co><&sp><&5>Epic|<&7>Class<&sp>Req<&co><&sp>&<def[Class]>|<&sp>|<&7><def[Attribute_1]><&co><&sp><&a>+<def[Main_Attribute]>|<&7><def[Attributes].exclude[<def[Attribute_1]>].random><&co><&sp><&a>+<def[Second_Attribute]>]
+      } 
+    }
