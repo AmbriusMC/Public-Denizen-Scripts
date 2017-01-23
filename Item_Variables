@@ -1,0 +1,64 @@
+Rarity_Names:
+  Common: li@Old|Broken|Worn|Weak|Shabby|Flawed|Ragged|Mundane|Inferior|Hideous|Humble|Jagged|Terrible|Rough|Tarnished|Weathered|Tattered
+  Rare: li@Strong|Enhanced|Durable|Fine|Light|Decent|Blood-Stained|Bright|Macho|Unmarked|New|Bulky|Apprentice|Exalted|Adept
+  Superior: li@Great|Elegant|Shiny|Strong|Costly|Spiritual|Gilted|Ornated|Flawless|Spiked|Fantastic|Reinforced|Master
+  Epic: li@Magical|Ancient|Invincible|Brilliant|Divine|Heavenly|Mysterious|Jeweled|Antique|Glorious
+
+Item_Names:
+  leather_helmet: li@Cap|Hood|Hat|Coif|Mask|headband|Pixane|Hood|Cloth Good|Leather Coif
+  leather_chestplate: li@Cuirie|Leather Cuirie|Coat Armor|Surcoat|Haori|Tunic|Doublet|Leather Jacket|Quilted Jacket|Hide Tunic|Leather Doublet|Coat|Leather Coat|Skin Coat|Cloak|Cloth Tunic|Hide Tunic
+  leather_leggings: li@Waders|Leather Waders|Skirt|Chausses|Leather Chausses|Trousers|Linen Cloth|Faulds|Leather Faulds|Leather Culet|Culet|Breeches|Legwraps|Leather Legwraps|Leather Trousers|Leather Skirt
+  leather_boots: li@Shoes|Skin Shoes|Leather Boots|Boots|Cloth Shoes|Sandals|Leather Sandals|Long Boots|Clogs|Pegged Shoes|Slippers|Climbers|Skin Boots
+  chainmail_helmet: li@Coif|Chain Coif|Mail Coif|Aventail|Pixane|Mail Hood|Mail Coif|Mail Aventail|Helmet|Chain Helmet|Ring Helmet
+  chainmail_chestplate: li@Chain Mail|Ringmail|Brigandine|Hauberk|Haubergeon|Gousset|Chainmail Hauberk|Balor Armor|Surcoat|Harness
+  chainmail_leggings: li@Leg Guards|Legwraps|Greaves|Chain Greaves|Ring Greaves|Tassets|Chain Leggings|Mail Tassets|Mail Leggings|Ring Chausses|Ring Leggings|Cuisse|Cuirass|Mail Cuirass|Chain Cuirass|Faulds|Chain Faulds|Mail Faulds
+  chainmail_boots: li@Mail Sabatons|Boots|Solleret|Long Boots|Mail Boots|Sabatons|Mail Solleret|Whalers|Mudsputters
+  gold_helmet: li@Crown|Mempo|Mask|Aventail|Flat Top|Spangen Helm|Barbute|Headband|Circlet|Diadem|Wizard Hat
+  gold_chestplate: li@Goldskin|Brigandine|Cuirass|Corslet|Breastplate|Sovereign Mail|Carapace|Battle Armor|Archon Armor|Rikkisgard Armor
+  gold_leggings: li@Poleyns|Faulds|Leg Guards|Thigh Armor|Cuisse|Fan-plates
+  gold_boots: li@Socks|Shoes|Boots|Long Boots|Dancers|Silk Shoes|Treads|Striders
+  iron_helmet: li@Sallet|Helmet|Falling Buffe|Armet|Hounskull|Combat Helmet|Kettle Hat|Bassinet|Barbute
+  iron_chestplate: li@Iron Brigandine|Brigandine|Cuirass|Corslet|Chausses|Battle Armor|Archon Armor||Iron Armor|Iron Brigandine|Iron Breastplate|Breastplate
+  iron_leggings: li@Poleyns|Faulds|Leg Guards|Thigh Armor|Cuisse|Fan-plates|Iron Plates|Iron Faulds
+  iron_boots: li@Brogans|Sabatons|Boots|Treads|Walkers|Iron Walkers|Iron Sabatons|Iron Treads|Striders|Iron Striders
+  diamond_helmet: li@Close helmet|Sallet|Armet|Hounskull|Cervelliere|Casque|Basinet|Spired Helm
+  diamond_chestplate: li@Platebody|Plate Mail|Warlord Plate|Ascension Armor|Brigandine|Archon Armor|Plate Brigandine|Plated Brigandine|Visage
+  diamond_leggings: li@Leg Plates|Plate legs|Plated Thigh Armor|Leg Guards|Plate Faulds
+  diamond_boots: li@Heavy Boots|Plated Heavy Boots|Sabatons|Plate Boots|Plate Sabatons|Plated Sabatons|Heavy Sabatons|Striders|Plate Striders
+
+Attributes:
+  Attribute_List: li@Vitality|Regeneration|Spirit|Intelligence|Strength|Endurance|Dexterity|Resistance|Haste
+
+Classes:
+  Class_List: li@sscBerserker|ssaDruid|ss4Saboteur|ss5Magus|ss9Guardian|sseThief
+
+Class_Armor:
+  sscBerserker: li@leather_helmet|leather_chestplate|leather_leggings|leather_boots|chainmail_helmet|chainmail_chestplate|chainmail_leggings|chainmail_boots|iron_helmet|iron_chestplate|iron_leggings|iron_boots
+  ssaDruid: li@leather_helmet|leather_chestplate|leather_leggings|leather_boots|gold_helmet|gold_boots|diamond_helmet|diamond_boots
+  ss4Saboteur: li@leather_helmet|leather_chestplate|leather_leggings|leather_boots|chainmail_helmet|chainmail_chestplate|chainmail_leggings|chainmail_boots|iron_helmet|iron_chestplate|iron_leggings|iron_boots
+  ss5Magus: li@leather_helmet|leather_chestplate|leather_leggings|leather_boots|gold_helmet|gold_chestplate|gold_leggings|gold_boots|diamond_helmet
+  ss9Guardian: li@diamond_helmet|diamond_chestplate|diamond_leggings|diamond_boots|iron_helmet|iron_chestplate|iron_leggings|iron_boots|chainmail_helmet|chainmail_chestplate|chainmail_leggings|chainmail_boots
+  sseThief: li@leather_helmet|leather_chestplate|leather_leggings|leather_boots|chainmail_helmet|chainmail_boots|gold_boots
+
+
+Armor_Types:
+  leather_helmet: li@sscBerserker|&ssaDruid|&ss4Saboteur|&ss5Magus|&sseThief
+  leather_chestplate: li@sscBerserker|&ssaDruid|&ss5Magus|&sseThief
+  leather_leggings: li@sscBerserker|&ssaDruid|&ss5Magus|&sseThief
+  leather_boots: li@sscBerserker|&ssaDruid|&ss4Saboteur|&ss5Magus|&sseThief
+  chainmail_helmet: li@sscBerserker|&ss4Saboteur|&sseThief
+  chainmail_chestplate: li@sscBerserker|&ss4Saboteur
+  chainmail_leggings: li@sscBerserker|&ss4Saboteur
+  chainmail_boots: li@sscBerserker|&ss4Saboteur
+  gold_helmet: li@&ssaDruid|&ss5Magus
+  gold_chestplate: li@&ss5Magus
+  gold_leggings: li@&ss5Magus
+  gold_boots: li@&ssaDruid|&ss5Magus
+  iron_helmet: li@&ss9Guardian|sscBerserker
+  iron_chestplate: li@&ss4Saboteur|&ss9Guardian
+  iron_leggings: li@&ss4Saboteur|&ss9Guardian
+  iron_boots: li@&ss9Guardian|sscBerserker
+  diamond_helmet: li@&ss9Guardian
+  diamond_chestplate: li@&ss9Guardian
+  diamond_leggings: li@&ss9Guardian
+  diamond_boots: li@&ss9Guardian
