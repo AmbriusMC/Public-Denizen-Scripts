@@ -1,0 +1,144 @@
+Berserker_Stats_Config:
+  type: yaml data
+  Health: 150
+  Melee Damage: 8
+
+Berserker_Skill_Config:
+  type: yaml data
+  ## Cleave ##
+  Cleave_Cooldown: 3
+  Cleave_Damage: 10
+  ## Battle Cry ##
+  BattleCry_Cooldown: 12
+  BattleCry_Buff: 
+  ##Overpower ##
+  Overpower_Range: 7
+  Overpower_Cooldown: 4
+  Overpower_Damage: 25
+  Overpower_Stun_Duration: 2
+
+
+Class_Health_Handler:
+  type: world
+  debug: false
+  events:
+    on player logs in:
+    - wait 1t
+    - adjust <player> scale_health:true
+    - foreach '<player.inventory.list_contents.with_lore[Unassigned Skill]>' {
+      - take <def[value]> quantity:64
+    }
+    - foreach '<player.inventory.list_contents.with_lore[Default Skill]>' {
+      - take <def[value]> quantity:64
+    }
+    - foreach '<player.inventory.list_contents.with_lore[Optional Skill]>' {
+      - take <def[value]> quantity:64
+    }
+    - give i@Cleave slot:1
+    - give i@BattleCry slot:2
+    - give i@Overpower slot:3
+    - give i@Unassigned_Skill slot:4
+    - give i@Unassigned_Skill slot:5
+    - give i@Unassigned_Skill slot:6
+
+Overpower:
+  type: item
+  debug: false
+  material: 385
+  display name: <&c>Overpower
+  lore:
+  - <&e>Default Skill
+  - <&sp> 
+  - <&2>Type<&co> <&a>[Targeted] <&6>Damage and CC
+  - <&2>Description<&co> <&6>Dash forward bashing into 
+  - <&6>the target stunning and dealing damage.
+  - <&sp>
+  - <&6>Only usable while <&e><&o>Enraged!
+
+Overpower_Cast:
+  type: task
+  debug: false
+  speed: 0
+  script:
+    - if <player.has_flag[Overpower_Cooldown]> {
+      - narrate "<&a><&l>[Skill] <&f>Overpower <&7>has <&f><player.flag[Overpower_Cooldown].expiration.in_seconds.round_to[1]>s <&7>until it's ready!"
+      - queue clear
+    }
+    - if !<player.has_flag[Enraged]> {
+      - narrate "<&a><&l>[Skill] <&7>You are not <&f>Enraged<&7>!"
+      - queue clear
+    }
+    - define target <player.target.within[<s@Berserker_Skill_Config.yaml_key[Overpower_Range].as_int||5>]>
+    - if <def[target]> !== null {
+      - if <def[target].is_player> {
+        - run Stun_Effect def:<s@Berserker_Skill_Config.yaml_key[Overpower_Stun_Duration].as_int||2> player:<def[target]>
+      }
+      - hurt <s@Berserker_Skill_Config.yaml_key[Overpower_Damage].as_int||15> <def[target]> cause:CUSTOM source:<player>
+      - playeffect <def[target].location.add[0,1,0]> effect:blockcrack_152 visibility:25 quantity:15 offset:0.4
+      - narrate "<&a><&l>[Skill] <&f><player.name> <&7>has used <&f>Overpower <&7>on <&f><def[target].name><&7>!" targets:<player.location.find.players.within[25]>
+    }
+    else {
+      - queue clear
+    }
+
+BattleCry:
+  type: item
+  debug: false
+  material: 2260
+  display name: <&c>BattleCry
+  lore:
+  - <&e>Default Skill
+  - <&sp>
+  - <&2>Type<&co> <&a>[Self Cast] <&6>Damage buff + AoE interrupt
+  - <&2>Description<&co> <&6>Let out a terrifying howl interrupting 
+  - <&6>nearby enemies. 
+  - <&sp>
+  - <&6>Additionally if you are carrying an axe in your 
+  - <&6>off-hand you will also gain a physical damage 
+  - <&6>increase. While the effect is active you will be 
+  - <&6>considered <&e><&o>Enraged<&6>, lasting the duration of 
+  - <&6>the buff.
+
+BattleCry_Cast:
+  type: task
+  debug: true
+  speed: 0
+  script:
+    - if <player.has_flag[BattleCry_Cooldown]> {
+      - narrate "<&a><&l>[Skill] <&f>BattleCry <&7>has <&f><player.flag[BattleCry_Cooldown].expiration.in_seconds.round_to[1]>s <&7>until it's ready!"
+      - queue clear
+    }
+    - flag player Enraged duration:6
+    - flag player BattleCry_Cooldown duration:12
+    - narrate "<&a><&l>[Skill] <&f><player.name> <&7>has used <&f>BattleCry<&7>!" targets:<player.location.find.players.within[25]>
+
+
+Cleave:
+  type: item
+  debug: false
+  material: iron_axe
+  display name: <&c>Cleave
+  lore:
+  - <&e>Default Skill
+  - <&sp>
+  - <&2>Type<&co> <&a>[Cone Attack] <&6>Cone damage 
+  - <&2>Description<&co> <&6>Do a powerful cleaving strike 
+  - <&6>dealing damage to all enemies in front of you.
+
+Cleave_Cast:
+  type: task
+  debug: false
+  speed: 0
+  script:
+    - if <player.has_flag[Cleave_Cooldown]> {
+      - narrate "<&a><&l>[Skill] <&f>Cleave <&7>has <&f><player.flag[Cleave_Cooldown].expiration.in_seconds.round_to[1]>s <&7>until it's ready!"
+      - queue clear
+    }
+    - playeffect <player.location.cursor_on[2].sub[0,0.5,0]> effect:SWEEP_ATTACK quantity:2 offset:0.2
+    - foreach <player.location.find.living_entities.within[6].exclude[<player>]> {
+      - if <player.location.facing[<def[Value]>]> {
+        - hurt <s@Berserker_Skill_Config.yaml_key[Cleave_Damage].as_int||5> <def[Value]> cause:CUSTOM source:<player> 
+      }
+    }
+    - narrate "<&a><&l>[Skill] <&f><player.name> <&7>has used <&f>Cleave<&7>!" targets:<player.location.find.players.within[25]>
+

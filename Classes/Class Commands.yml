@@ -1,0 +1,59 @@
+Hero_Commands:
+  type: command
+  debug: false
+  name: Hero
+  usage: /Hero (Choose)
+  description: 
+  permission: hero
+  permission message: <&7>Sorry, <&6><player.name><&7>. You cannot use this command because you do not have the permission <&f>'<permission>'<&7>!
+  script:
+  - if <context.args.size> == 0 {
+    - inventory open d:in@Class_Select_Menu
+  }
+
+Class_Select_Menu:
+  type: Inventory
+  inventory: HOPPER
+  title: <&6><&l>Select a class<&co>
+  slots:
+  - "[i@Berserker_Icon] [] [] [] [i@Exit_Icon]"
+
+Class_Select_Menu_Handler:
+  type: world
+  debug: false
+  events:
+    on player clicks in Class_Select_Menu:
+    - determine cancelled
+    on player drags in Class_Select_Menu:
+    - determine cancelled
+    on player clicks Berserker_Icon in Class_Select_Menu:
+    - inventory close
+    - foreach '<player.inventory.list_contents.with_lore[Unassigned Skill]>' {
+      - take <def[value]> quantity:64
+    }
+    - foreach '<player.inventory.list_contents.with_lore[Default Skill]>' {
+      - take <def[value]> quantity:64
+    }
+    - foreach '<player.inventory.list_contents.with_lore[Optional Skill]>' {
+      - take <def[value]> quantity:64
+    }
+    - give i@Cleave slot:1
+    - give i@BattleCry slot:2
+    - give i@Overpower slot:3
+    - give i@Unassigned_Skill slot:4
+    - give i@Unassigned_Skill slot:5
+    - give i@Unassigned_Skill slot:6
+    - adjust <player> max_health:"<s@Berserker_Stats_Config.yaml_key[Health].as_int||150>
+    - adjust <player> scale_health:true
+    - adjust <player> health:<player.health.max>
+    - flag player Class:Berserker
+    - title "subtitle:<&6>You have become a <&c>Berserker<&6>!"
+    on player clicks Exit_Icon in Class_Select_Menu:
+    - inventory close
+
+Berserker_Icon:
+  type: item
+  material: iron_axe
+  display name: <&c>Berserker
+  lore:
+  - <&a>Click here to become a berserker!

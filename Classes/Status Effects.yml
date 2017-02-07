@@ -1,0 +1,43 @@
+Stun_Effect: 
+  type: task 
+  debug: false 
+  speed: 0 
+  script: 
+  - flag <player> Stun_Effect duration:<def[1].as_duration.add[d@1s]||3s> 
+  - spawn e@armor_stand[visible=false;marker=true;gravity=true] <player.location> save:marker 
+  - flag <player> Stun_Marker:<entry[marker].spawned_entities.get[1]> 
+  - mount <player>|<entry[marker].spawned_entities.get[1]> 
+  - run Stun_Removal delay:<def[1].as_duration||2s> 
+
+Stun_Removal: 
+  type: task 
+  debug: false 
+  speed: 0
+  script: 
+  - if <player.has_flag[Stun_Effect].not> { 
+    - queue clear 
+    } 
+  - define location <player.location.add[0,0.5,0]> 
+  - flag <player> Stun_Effect:! 
+  - define marker <player.flag[Stun_Marker].as_entity||null> 
+  - if <def[marker].is_spawned||false> { 
+    - remove <def[marker]> 
+    } 
+  - if <player.is_inside_vehicle> {
+    - teleport <player> <def[location]>
+  }
+
+Stun_Handler: 
+  type: world 
+  debug: false 
+  events: 
+    on check command:
+    - determine passively fulfilled
+    - narrate "<&7>Removing armor stands..."
+    - foreach <player.location.find.entities[armor_stand].within[40]> {
+      - remove <def[value]>
+    }
+    on player steers entity: 
+    - if <player.has_flag[Stun_Effect]> { 
+      - determine cancelled 
+    }

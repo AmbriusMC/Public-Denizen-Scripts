@@ -1,3 +1,56 @@
+Home:
+  type: command
+  debug: true
+  name: Home
+  usage: /Home (set/player)
+  description: Teleports you to your home. Alternatively set your home or teleport to another player's home, which requires an additional permission. 
+  permission: utility.home
+  permission message: <&7>Sorry, <&6><player.name><&7>. You cannot use this command because you do not have the permission <&f>'<permission>'<&7>!
+  tab complete: 
+  - if !<player.is_op||<context.server>> queue clear 
+  - determine <server.list_players.parse[name].filter[starts_with[<context.args.last>]]>
+  script:
+  - if <context.args.size> == 0 {
+    - if <player.has_flag[Home]> {
+      - teleport <player.flag[Home]>
+      - narrate "<&7>You have spawned home."
+      - queue clear
+    }
+    else {
+      - narrate "<&7>You do not have any home set!"
+      - queue clear
+    }
+  }
+  else if <context.args.size> == 1 {
+    - define Player p@<context.args.get[1]>
+    - if <context.args.get[1]> == set {
+      - flag player Home:<player.location>
+      - narrate "<&7>You have set a new home at <&6><player.location.simple><&7>!"
+      - queue clear
+    }
+    else if <def[Player]> matches player {
+      - if <player.has_permission[utility.home.extended]> {
+        - if <def[player].has_flag[Home]> {
+          - teleport <player.flag[Home]>
+          - narrate "<&7>You have teleported to the home of <&6><context.args.get[1]><&7>."
+          - queue clear
+        }
+        else {
+          - narrate "<&6><context.args.get[1]> <&7>does not have a home set!"
+        }
+      }
+      else {
+        - narrate "<&7>Sorry, <&6><player.name><&7>. You cannot use this command because you do not have the permission <&f>'utility.home.extended'<&7>!"
+      }
+    }
+    else {
+      - narrate "<&7>The player <&6><context.args.get[1]> <&7>doesn't exist!"
+    }
+  }
+  else {
+    - narrate "<&7>Too many arguments! <&f>'/Home (set/player)'"
+  }
+
 Warp:
   type: command
   debug: false
@@ -155,7 +208,7 @@ Repair_Command:
   name: Repair
   usage: /Repair
   description: Changes the item stack in your hand to 64 of the item.
-  permission: utility.more
+  permission: utility.repair
   permission message: <&7>Sorry, <&6><player.name><&7>. You cannot use this command because you do not have the permission <&f>'<permission>'<&7>!
   script:
   - if <player.item_in_hand> == i@air {
@@ -206,8 +259,7 @@ Heal_Command:
     - queue clear
   }
   else if <context.args.size> == 1 {
-    - define Player p@<context.args.get[1]>
-    - if <def[Player]> matches onlineplayer {
+    - if <context.args.get[1]> matches onlineplayer {
       - heal p@<context.args.get[1]>
       - feed p@<context.args.get[1]>
       - narrate "<&7>You have been healed!" targets:p@<context.args.get[1]>
@@ -221,44 +273,6 @@ Heal_Command:
   }
   else {
     - narrate "<&7>Too many arguments! <&f>/Heal (player)"
-  }
-
-Data:
-  type: command
-  debug: false
-  name: Data
-  usage: /Data (player)
-  description: Display a bunch of information about a player
-  permission: utility.data
-  permission message: <&7>Sorry, <&6><player.name><&7>. You cannot use this command because you do not have the permission <&f>'<permission>'<&7>!
-  tab complete: 
-  - if !<player.is_op||<context.server>> queue clear 
-  - determine <server.list_players.parse[name].filter[starts_with[<context.args.last>]]>
-  script:
-  - if <context.args.size> == 0 {
-    - narrate '<&7>You must specify a player!'
-    - queue clear
-  }
-  else if <context.args.size> == 1 {
-    - if p@<context.args.get[1]> matches player {
-      - define player p@<context.args.get[1]>
-      - ^narrate '<&6><&l><context.args.get[1]>]<&co>'
-      - ^narrate '<&a>Online<&co> <&e><def[player].is_online>'
-      - ^narrate '<&a>Banned<&co> <&f><def[player].is_banned>'
-      - if <player.is_op> {
-        - if p@<context.args.get[1]> matches onlineplayer {
-          - ^narrate '<&f>IP<&co> <&7><def[player].ip.address>'
-        }
-        else {
-          - ^narrate '<&f>IP<&co> <&7>Currently not available'
-        }
-        - ^narrate '<&a>Location<&co> <&f><def[player].location.simple>'
-        - ^narrate '<&a>UUID<&co> <&f><def[player].uuid>'
-      }
-    }
-  }
-  else {
-    - narrate "<&7>Too many arguments! <&f>'/Data (player)'"
   }
 
 Spawn:
@@ -312,14 +326,14 @@ Inventory_Command:
     - queue clear
   }
   else if <context.args.size> == 1 {
-    - if <context.args.get[1]> matches player {
+    - if <context.args.get[1]> matches onlineplayer {
       - narrate "<&7>Checking <&6><context.args.get[1]><&7>!"
       - define Player p@<context.args.get[1]>
       - inventory open d:<def[Player].inventory> 
       - queue clear
     }
     else {
-      - narrate "<&7>You must specify a player!"
+      - narrate "<&7>You must specify an online player!"
       - queue clear
     }
   }
@@ -575,7 +589,7 @@ Item_Command:
     - queue clear
   }
   else if <context.args.size> == 1 {
-    - if i@<context.args.get[1]> matches item {
+    - if <context.args.get[1]> matches item {
       - give i@<context.args.get[1]> quantity:1
       - narrate "<&7><player.name> created <&6>1<&7> of <&6><context.args.get[1]><&7>!" targets:<server.list_online_ops>
       - queue clear
@@ -586,7 +600,7 @@ Item_Command:
     }
   }
   else if <context.args.size> == 2 {
-    - if i@<context.args.get[1]> !matches item {
+    - if <context.args.get[1]> !matches item {
       - narrate "<&7>No item can be found by that name!"
       - queue clear
     }
@@ -595,7 +609,7 @@ Item_Command:
       - queue clear
     }
     else {
-      - give i@<context.args.get[1]> quantity:i@<context.args.get[2]>
+      - give i@<context.args.get[1]> quantity:<context.args.get[2]>
       - narrate "<&7><player.name> created <&6><context.args.get[2]><&7> of <&6><context.args.get[1]><&7>!" targets:<server.list_online_ops>
       - queue clear
     }
@@ -654,7 +668,7 @@ I_Command:
     - queue clear
   }
   else if <context.args.size> == 1 {
-    - if i@<context.args.get[1]> matches item {
+    - if <context.args.get[1]> matches item {
       - give i@<context.args.get[1]> quantity:1
       - narrate "<&7><player.name> created <&6>1<&7> of <&6><context.args.get[1]><&7>!" targets:<server.list_online_ops>
       - queue clear
@@ -674,7 +688,7 @@ I_Command:
       - queue clear
     }
     else {
-      - give i@<context.args.get[1]> quantity:i@<context.args.get[2]>
+      - give i@<context.args.get[1]> quantity:<context.args.get[2]>
       - narrate "<&7><player.name> created <&6><context.args.get[2]><&7> of <&6><context.args.get[1]><&7>!" targets:<server.list_online_ops>
       - queue clear
     }

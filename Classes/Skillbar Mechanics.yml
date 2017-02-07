@@ -1,0 +1,43 @@
+Skillbar_Handler:
+  type: world
+  debug: false
+  events:
+    on player scrolls their hotbar:
+    - if <player.gamemode.id> == 2 && <context.new_slot> <= 6 {
+      - determine passively cancelled
+      - if <player.has_flag[Class]> && <player.flag[Class]> !== Citizen {
+        - if <player.inventory.slot[<context.new_slot>].scriptname> == Unassigned_Skill {
+          - narrate "<&7>This skill has not been assigned yet!"
+        }
+        else {
+          - inject Cast_Sequence
+        }
+      }
+    }
+    on player clicks in inventory:
+    - if <player.gamemode.id> == 2 && <context.slot> <= 6 {
+      - determine passively cancelled
+    }
+
+Cast_Sequence:
+  type: task
+  debug: false
+  speed: 0
+  script:
+    - inject <player.inventory.slot[<context.new_slot>].scriptname>_Cast
+    - define Skill_Cooldown <player.inventory.slot[<context.new_slot>].scriptname>_Cooldown
+    - define Class_Skill_Config s@<player.flag[Class]>_Skill_Config
+    - flag player <def[Skill_Cooldown]> duration:<def[Class_Skill_Config].yaml_key[<def[Skill_Cooldown]>].as_int||4>
+    - repeat <def[Class_Skill_Config].yaml_key[<def[Skill_Cooldown]>].as_int||4> {
+      - adjust <player.inventory.slot[<context.new_slot>]> quantity:<player.flag[<def[Skill_Cooldown]>].expiration.in_seconds.round> save:Cooldown
+      - take slot:<context.new_slot>
+      - inventory set origin:<entry[Cooldown].result> slot:<context.new_slot>
+      - wait 1s
+    }
+
+Unassigned_Skill:
+  type: item
+  material: pumpkin_seeds
+  display name: <&7>Unassigned
+  lore:
+  - <&f>Unassigned Skill
