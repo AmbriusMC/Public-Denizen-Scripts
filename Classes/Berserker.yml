@@ -8,15 +8,33 @@ Berserker_Skill_Config:
   ## Cleave ##
   Cleave_Cooldown: 3
   Cleave_Damage: 10
+  Cleave_Message: "<&a><&l>[Skill] <&f><player.name> <&7>has used <&f><def[Skill]><&7>!"
   ## Battle Cry ##
   BattleCry_Cooldown: 12
   BattleCry_Buff: 
   ##Overpower ##
-  Overpower_Range: 7
-  Overpower_Cooldown: 4
+  Overpower_Range: 6
+  Overpower_Cooldown: 3
   Overpower_Damage: 25
   Overpower_Stun_Duration: 2
+  Overpower_Message: "<&a><&l>[Skill] <&f><player.name> <&7>has used <&f><def[Skill].to_titlecase> <&7>on <&f><def[target].name><&7>!"
 
+Berserker_Skills_Menu:
+  type: Inventory
+  title: <&6><&l>Berserker Skills<&co>
+  size: 18
+  slots:
+  - "[i@red_dye] [i@Cleave] [i@BattleCry] [i@Overpower] [] [] [] [] []"
+  - "[] [] [] [] [] [] [] [] []"
+
+Berserker_Skills_Menu_Handler:
+  type: world
+  debug: false
+  events:
+    on player clicks in Berserker_Skills_Menu:
+    - determine cancelled
+    on player drags in Berserker_Skills_Menu:
+    - determine cancelled
 
 Class_Health_Handler:
   type: world
@@ -45,7 +63,7 @@ Overpower:
   type: item
   debug: false
   material: 385
-  display name: <&c>Overpower
+  display name: <&c><&l>Overpower
   lore:
   - <&e>Default Skill
   - <&sp> 
@@ -73,9 +91,9 @@ Overpower_Cast:
       - if <def[target].is_player> {
         - run Stun_Effect def:<s@Berserker_Skill_Config.yaml_key[Overpower_Stun_Duration].as_int||2> player:<def[target]>
       }
+      - push <player> destination:<def[target].location.add[0,0.3,0]> speed:0.8 duration:1t no_rotate no_damage
       - hurt <s@Berserker_Skill_Config.yaml_key[Overpower_Damage].as_int||15> <def[target]> cause:CUSTOM source:<player>
       - playeffect <def[target].location.add[0,1,0]> effect:blockcrack_152 visibility:25 quantity:15 offset:0.4
-      - narrate "<&a><&l>[Skill] <&f><player.name> <&7>has used <&f>Overpower <&7>on <&f><def[target].name><&7>!" targets:<player.location.find.players.within[25]>
     }
     else {
       - queue clear
@@ -85,7 +103,7 @@ BattleCry:
   type: item
   debug: false
   material: 2260
-  display name: <&c>BattleCry
+  display name: <&c><&l>BattleCry
   lore:
   - <&e>Default Skill
   - <&sp>
@@ -108,16 +126,17 @@ BattleCry_Cast:
       - narrate "<&a><&l>[Skill] <&f>BattleCry <&7>has <&f><player.flag[BattleCry_Cooldown].expiration.in_seconds.round_to[1]>s <&7>until it's ready!"
       - queue clear
     }
+    - playeffect <player.location.add[0,1,0]> effect:NOTE visibility:25 quantity:5 offset:0.4
+    - playsound <player.location> sound:ENTITY_POLAR_BEAR_WARNING volume:1.5 pitch:0.7
     - flag player Enraged duration:6
     - flag player BattleCry_Cooldown duration:12
-    - narrate "<&a><&l>[Skill] <&f><player.name> <&7>has used <&f>BattleCry<&7>!" targets:<player.location.find.players.within[25]>
 
 
 Cleave:
   type: item
   debug: false
   material: iron_axe
-  display name: <&c>Cleave
+  display name: <&c><&l>Cleave
   lore:
   - <&e>Default Skill
   - <&sp>
@@ -140,5 +159,3 @@ Cleave_Cast:
         - hurt <s@Berserker_Skill_Config.yaml_key[Cleave_Damage].as_int||5> <def[Value]> cause:CUSTOM source:<player> 
       }
     }
-    - narrate "<&a><&l>[Skill] <&f><player.name> <&7>has used <&f>Cleave<&7>!" targets:<player.location.find.players.within[25]>
-

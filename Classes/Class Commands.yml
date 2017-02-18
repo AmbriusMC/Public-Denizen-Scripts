@@ -1,15 +1,48 @@
-Hero_Commands:
+Class_Commands:
   type: command
   debug: false
-  name: Hero
-  usage: /Hero (Choose)
-  description: 
-  permission: hero
+  name: Class
+  usage: /Class (Choose)
+  description: The various class commands.
+  permission: class
   permission message: <&7>Sorry, <&6><player.name><&7>. You cannot use this command because you do not have the permission <&f>'<permission>'<&7>!
   script:
   - if <context.args.size> == 0 {
     - inventory open d:in@Class_Select_Menu
   }
+  else if <context.args.size> == 1 {
+    - if <context.args.get[1]> == skills && <player.flag[Class]> !== Citizen {
+      - inventory open d:in@<player.flag[Class]>_Skills_Menu
+    }
+    else {
+      - narrate "<&a><&l>[Class] <&7>You currently do not have any class set!"
+    }
+  }
+
+Cast_Command:
+  type: command
+  debug: true
+  name: Cast
+  description: 
+  permission: class.cast
+  permission message: <&7>Sorry, <&6><player.name><&7>. You cannot use this command because you do not have the permission <&f>'<permission>'<&7>!
+  script:
+  - if <context.args.size> == 0 {
+    - narrate "<&a><&l>[Skill] <&7>You must specify a skill!"
+    - queue clear
+  }
+  else if <context.args.size> == 1 {
+    - if <context.args.get[1]>_Cast matches script {
+      - define Skill <context.args.get[1].to_titlecase>
+      - define Skill_Slot <player.inventory.find[<def[Skill].to_uppercase>]>
+      - inject Cast_Sequence
+    }
+    else {
+      - narrate "<&a><&l>[Skill] <&7>This skill does not exist!"
+    }
+  }
+
+
 
 Class_Select_Menu:
   type: Inventory

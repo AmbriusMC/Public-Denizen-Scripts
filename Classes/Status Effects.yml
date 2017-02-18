@@ -2,8 +2,8 @@ Stun_Effect:
   type: task 
   debug: false 
   speed: 0 
-  script: 
-  - flag <player> Stun_Effect duration:<def[1].as_duration.add[d@1s]||3s> 
+  script:
+  - flag <player> Stun_Effect duration:<def[1].as_duration||3s> 
   - spawn e@armor_stand[visible=false;marker=true;gravity=true] <player.location> save:marker 
   - flag <player> Stun_Marker:<entry[marker].spawned_entities.get[1]> 
   - mount <player>|<entry[marker].spawned_entities.get[1]> 
@@ -19,25 +19,31 @@ Stun_Removal:
     } 
   - define location <player.location.add[0,0.5,0]> 
   - flag <player> Stun_Effect:! 
-  - define marker <player.flag[Stun_Marker].as_entity||null> 
+  - define marker <player.flag[Stun_Marker].as_entity||null>
+  - teleport <player> <def[location]>
   - if <def[marker].is_spawned||false> { 
     - remove <def[marker]> 
-    } 
-  - if <player.is_inside_vehicle> {
-    - teleport <player> <def[location]>
   }
 
 Stun_Handler: 
   type: world 
   debug: false 
   events: 
-    on check command:
-    - determine passively fulfilled
-    - narrate "<&7>Removing armor stands..."
-    - foreach <player.location.find.entities[armor_stand].within[40]> {
-      - remove <def[value]>
-    }
     on player steers entity: 
     - if <player.has_flag[Stun_Effect]> { 
       - determine cancelled 
     }
+
+Silence_Effect:
+  type: task
+  debug: true
+  speed: 0
+  script:
+  - flag <player> Silence_Effect duration:<def[1].as_duration>
+  - repeat <def[1].as_int> {
+    - if !<player.has_flag[Stun_Effect]> {
+      - actionbar "<&e><&l>Silenced for another <&a><player.flag[Silence_Effect].expiration.in_seconds.round>s<&e><&l>!"
+      - wait 1s
+    }
+  }
+  - actionbar "<&a><&l>Silenced has ended!"
