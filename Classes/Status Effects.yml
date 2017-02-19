@@ -1,29 +1,34 @@
-Stun_Effect: 
-  type: task 
-  debug: false 
-  speed: 0 
-  script:
-  - flag <player> Stun_Effect duration:<def[1].as_duration||3s> 
-  - spawn e@armor_stand[visible=false;marker=true;gravity=true] <player.location> save:marker 
-  - flag <player> Stun_Marker:<entry[marker].spawned_entities.get[1]> 
-  - mount <player>|<entry[marker].spawned_entities.get[1]> 
-  - run Stun_Removal delay:<def[1].as_duration||2s> 
+## <def[1]> is the duration ## <def[2]> is the target ##
 
-Stun_Removal: 
-  type: task 
-  debug: false 
+Stun_Effect:
+  type: task
+  debug: true
   speed: 0
-  script: 
-  - if <player.has_flag[Stun_Effect].not> { 
-    - queue clear 
-    } 
-  - define location <player.location.add[0,0.5,0]> 
-  - flag <player> Stun_Effect:! 
-  - define marker <player.flag[Stun_Marker].as_entity||null>
-  - teleport <player> <def[location]>
-  - if <def[marker].is_spawned||false> { 
-    - remove <def[marker]> 
-  }
+  script:
+    - flag <def[2]> Stun_Effect duration:<def[1].as_duration>
+    - spawn e@armor_stand[visible=false;marker=true;gravity=true] <def[2].location> save:marker
+    - mount <def[2]>|<entry[marker].spawned_entities.get[1]> <def[2].location>
+    - run Stun_Message def:<def[1]>|<def[2]>
+    - wait <def[1].as_duration>
+    - flag <def[2]> Stun_Effect:!
+    - teleport <def[2]> <def[2].location.add[0,0.8,0]>
+    - wait 1t
+    - remove <entry[marker].spawned_entities.get[1]>
+
+Stun_Message:
+  type: task
+  debug: true
+  speed: 0
+  script:
+    - if !<def[2].is_player> {
+      - queue clear
+    }
+    - repeat <def[1].as_int> {
+      - actionbar "<&e><&l>Stunned for another <&a><def[2].flag[Stun_Effect].expiration.in_seconds.round>s<&e><&l>!" targets:<def[2]>
+      - wait 1s
+    }
+    - actionbar "<&a><&l>Stun has ended!" targets:<def[2]>
+
 
 Stun_Handler: 
   type: world 
@@ -39,11 +44,11 @@ Silence_Effect:
   debug: true
   speed: 0
   script:
-  - flag <player> Silence_Effect duration:<def[1].as_duration>
-  - repeat <def[1].as_int> {
-    - if !<player.has_flag[Stun_Effect]> {
-      - actionbar "<&e><&l>Silenced for another <&a><player.flag[Silence_Effect].expiration.in_seconds.round>s<&e><&l>!"
-      - wait 1s
+    - flag <def[2]> Silence_Effect duration:<def[1].as_duration>
+    - repeat <def[1].as_int> {
+      - if !<def[2].has_flag[Stun_Effect]> {
+        - actionbar "<&e><&l>Silenced for another <&a><def[2].flag[Silence_Effect].expiration.in_seconds.round>s<&e><&l>!" targets:<def[2]>   
+      }
+      - wait 1s 
     }
-  }
-  - actionbar "<&a><&l>Silenced has ended!"
+    - actionbar "<&a><&l>Silenced has ended!" targets:<def[2]>

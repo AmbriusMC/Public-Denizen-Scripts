@@ -11,7 +11,7 @@ Class_Commands:
     - inventory open d:in@Class_Select_Menu
   }
   else if <context.args.size> == 1 {
-    - if <context.args.get[1]> == skills && <player.flag[Class]> !== Citizen {
+    - if <context.args.get[1]> == skills && <player.flag[Class]> != Citizen {
       - inventory open d:in@<player.flag[Class]>_Skills_Menu
     }
     else {
@@ -41,8 +41,6 @@ Cast_Command:
       - narrate "<&a><&l>[Skill] <&7>This skill does not exist!"
     }
   }
-
-
 
 Class_Select_Menu:
   type: Inventory

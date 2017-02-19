@@ -87,10 +87,8 @@ Overpower_Cast:
       - queue clear
     }
     - define target <player.target.within[<s@Berserker_Skill_Config.yaml_key[Overpower_Range].as_int||5>]>
-    - if <def[target]> !== null {
-      - if <def[target].is_player> {
-        - run Stun_Effect def:<s@Berserker_Skill_Config.yaml_key[Overpower_Stun_Duration].as_int||2> player:<def[target]>
-      }
+    - if <def[target]> != null {
+      - run Stun_Effect def:<s@Berserker_Skill_Config.yaml_key[Overpower_Stun_Duration].as_int||2>|<def[target]>
       - push <player> destination:<def[target].location.add[0,0.3,0]> speed:0.8 duration:1t no_rotate no_damage
       - hurt <s@Berserker_Skill_Config.yaml_key[Overpower_Damage].as_int||15> <def[target]> cause:CUSTOM source:<player>
       - playeffect <def[target].location.add[0,1,0]> effect:blockcrack_152 visibility:25 quantity:15 offset:0.4

@@ -33,6 +33,10 @@ Cast_Sequence:
       - narrate "<&a><&l>[Skill] <&7>You are currently silenced for another <&f><player.flag[Silence_Effect].expiration.in_seconds.round_to[1]>s<&7>!"
       - queue clear
     }
+    - if <player.has_flag[Stun_Effect]> {
+      - narrate "<&a><&l>[Skill] <&7>You are currently Stunned for another <&f><player.flag[Stun_Effect].expiration.in_seconds.round_to[1]>s<&7>!"
+      - queue clear
+    }
     - define Skill_Cooldown <def[Skill]>_Cooldown
     - define Class_Skill_Config s@<player.flag[Class]>_Skill_Config
     - inject <def[Skill]>_Cast
