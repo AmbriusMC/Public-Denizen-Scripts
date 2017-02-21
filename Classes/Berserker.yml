@@ -8,16 +8,22 @@ Berserker_Skill_Config:
   ## Cleave ##
   Cleave_Cooldown: 3
   Cleave_Damage: 10
-  Cleave_Message: "<&a><&l>[Skill] <&f><player.name> <&7>has used <&f><def[Skill]><&7>!"
+  Cleave_Range:
   ## Battle Cry ##
   BattleCry_Cooldown: 12
   BattleCry_Buff: 
-  ##Overpower ##
+  ## Overpower ##
   Overpower_Range: 6
   Overpower_Cooldown: 3
   Overpower_Damage: 25
-  Overpower_Stun_Duration: 2
+  Overpower_Stun_Duration: 1.75
   Overpower_Message: "<&a><&l>[Skill] <&f><player.name> <&7>has used <&f><def[Skill].to_titlecase> <&7>on <&f><def[target].name><&7>!"
+  ## Leap ##
+  Leap_Damage: 20
+  Leap_Cooldown: 3
+  Leap_Stun_Duration: 2.5
+  Leap_Radius: 3
+
 
 Berserker_Skills_Menu:
   type: Inventory
@@ -59,6 +65,54 @@ Class_Health_Handler:
     - give i@Unassigned_Skill slot:5
     - give i@Unassigned_Skill slot:6
 
+Leap:
+  type: item
+  debug: true
+  material: 443
+  display name: <&c><&l>Leap
+  lore:
+  - <&e>Default Skill
+  - <&sp>
+  - <&2>Type<&co> <&a>[Launch] <&6>Mobility
+  - <&2>Description<&co> <&6>Leap forward stunning everybody
+  - <&6>where you land, dealing damage to them and
+  - <&6>generating rage.
+
+Leap_Cast:
+  type: task
+  debug: false
+  speed: 0
+  script:
+    - if <player.has_flag[Leap_Cooldown]> {
+      - narrate "<&a><&l>[Skill] <&f>Leap <&7>has <&f><player.flag[Leap_Cooldown].expiration.in_seconds.round_to[1]>s <&7>until it's ready!"
+      - queue clear
+    }
+    - push <player> origin:<player.location> destination:<player.location.cursor_on[5].add[0,3,0]> speed:1.5 duration:1t script:Leap_Effect no_damage no_rotate
+
+Leap_Effect:
+  type: task
+  debug: false
+  speed: 0
+  script:
+    - flag player In_Air duration:5s
+    - wait 10t
+    - while <player.has_flag[In_Air]> {      
+      - if <player.location.below.material> != m@air {
+        - flag player In_Air:!
+      }
+      - wait 1t
+    }
+    - foreach <player.location.find.living_entities.within[<s@Berserker_Skill_Config.yaml_key[Leap_Radius].as_decimal||2>].exclude[<player>]> {
+      - run Stun_Effect def:<s@Berserker_Skill_Config.yaml_key[Overpower_Stun_Duration].as_decimal||2.5>|<def[value]>
+      - hurt <s@Berserker_Skill_Config.yaml_key[Leap_Damage].as_int||5> <def[Value]> cause:CUSTOM source:<player>
+    }
+    - define Location <player.location.below>
+    - playsound <def[Location]> sound:ENTITY_ENDERDRAGON_FIREBALL_EXPLODE volume:50 pitch:1
+    - repeat 4 {
+      - playeffect <def[Location]> effect:LAVA visibility:25 quantity:20 offset:1.0,0,1.0 
+      - wait 1t
+    }
+
 Overpower:
   type: item
   debug: false
@@ -87,8 +141,8 @@ Overpower_Cast:
       - queue clear
     }
     - define target <player.target.within[<s@Berserker_Skill_Config.yaml_key[Overpower_Range].as_int||5>]>
-    - if <def[target]> != null {
-      - run Stun_Effect def:<s@Berserker_Skill_Config.yaml_key[Overpower_Stun_Duration].as_int||2>|<def[target]>
+    - if <def[target]> != null && <def[target].name> != ARMOR_STAND {
+      - run Stun_Effect def:<s@Berserker_Skill_Config.yaml_key[Overpower_Stun_Duration].as_decimal||2>|<def[target]>
       - push <player> destination:<def[target].location.add[0,0.3,0]> speed:0.8 duration:1t no_rotate no_damage
       - hurt <s@Berserker_Skill_Config.yaml_key[Overpower_Damage].as_int||15> <def[target]> cause:CUSTOM source:<player>
       - playeffect <def[target].location.add[0,1,0]> effect:blockcrack_152 visibility:25 quantity:15 offset:0.4
@@ -152,7 +206,7 @@ Cleave_Cast:
       - queue clear
     }
     - playeffect <player.location.cursor_on[2].sub[0,0.5,0]> effect:SWEEP_ATTACK quantity:2 offset:0.2
-    - foreach <player.location.find.living_entities.within[6].exclude[<player>]> {
+    - foreach <player.location.find.living_entities.within[<s@Berserker_Skill_Config.yaml_key[Cleave_Range].as_int||6>].exclude[<player>]> {
       - if <player.location.facing[<def[Value]>]> {
         - hurt <s@Berserker_Skill_Config.yaml_key[Cleave_Damage].as_int||5> <def[Value]> cause:CUSTOM source:<player> 
       }
