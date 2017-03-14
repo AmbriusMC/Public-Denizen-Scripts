@@ -1,5 +1,6 @@
-Berserker_Stats_Config:
+Berserker_Stat_Config:
   type: yaml data
+  Class_Resource: Rage
   Health: 150
   Melee Damage: 8
 
@@ -8,15 +9,18 @@ Berserker_Skill_Config:
   ## Cleave ##
   Cleave_Cooldown: 3
   Cleave_Damage: 10
-  Cleave_Range:
+  Cleave_Range: 6
+  Cleave_Cost: 2
   ## Battle Cry ##
   BattleCry_Cooldown: 12
   BattleCry_Buff: 
+  BattleCry_Cost: 4
   ## Overpower ##
   Overpower_Range: 6
   Overpower_Cooldown: 3
   Overpower_Damage: 25
-  Overpower_Stun_Duration: 1.75
+  Overpower_Stun_Duration: 2
+  Overpower_Cost: 3
   Overpower_Message: "<&a><&l>[Skill] <&f><player.name> <&7>has used <&f><def[Skill].to_titlecase> <&7>on <&f><def[target].name><&7>!"
   ## Leap ##
   Leap_Damage: 20
@@ -24,23 +28,82 @@ Berserker_Skill_Config:
   Leap_Stun_Duration: 2.5
   Leap_Radius: 3
 
+Berserker_World_Handler:
+  type: world
+  debug: false
+  events:
+    on player login:
+    - wait 1s
+    - while <player.is_online> {
+      - define Mana <yaml[<player.uuid>].read[General.Mana].as_int>
+      - adjust <player> fake_experience:<def[Mana].div[20]>|<def[Mana]>
+      - if <player.flag[Class]> == Berserker {
+        - if !<player.has_flag[In_Combat]> {
+          - if <def[Mana]> >= 1 {
+            - yaml id:<player.uuid> set General.Mana:<def[Mana].sub[1]>
+            - define Mana <def[Mana].sub[1]>
+            - adjust <player> fake_experience:<def[Mana].div[20]>|<def[Mana]>
+          }
+          else if <def[Mana]> <= 1 {
+            - yaml id:<player.uuid> set General.Mana:0
+            - adjust <player> fake_experience:0.0|0
+          }
+        }
+      }
+      - wait 1s
+    }
+    on player damages entity:
+    - if <player.flag[Class]> == Berserker {
+      - if <context.cause> == entity_attack {
+        - define Mana <yaml[<player.uuid>].read[General.Mana].as_int>
+        - if <def[Mana].add[2]> >= 20 {
+          - yaml id:<player.uuid> set General.Mana:20
+          - adjust <player> fake_experience:1.0|20
+        }
+        else if <def[Mana]> < 18 {
+          - yaml id:<player.uuid> set General.Mana:<def[Mana].add[2]>
+          - define Mana <def[Mana].add[2]>
+          - adjust <player> fake_experience:<def[Mana].div[20]>|<def[Mana]>
+        }
+      }
+    }
 
 Berserker_Skills_Menu:
   type: Inventory
+  debug: false
   title: <&6><&l>Berserker Skills<&co>
   size: 18
   slots:
   - "[i@red_dye] [i@Cleave] [i@BattleCry] [i@Overpower] [] [] [] [] []"
-  - "[] [] [] [] [] [] [] [] []"
+  - "[i@Leap] [] [] [] [] [] [] [] []"
 
 Berserker_Skills_Menu_Handler:
   type: world
-  debug: false
+  debug: true
   events:
     on player clicks in Berserker_Skills_Menu:
     - determine cancelled
     on player drags in Berserker_Skills_Menu:
     - determine cancelled
+    on player clicks Leap in Berserker_Skills_Menu:
+    - if <yaml[<player.uuid>].read[Berserker.Skills.Leap]> == 0 {
+      - inject Skill_Limit_Check
+      - yaml id:<player.uuid> set <player.flag[Class]>.Skills.Leap:1
+      - inventory set origin:i@Leap slot:<player.inventory.find[i@Unassigned_Skill]>
+      - inventory open d:in@<player.flag[Class]>_Skills_Menu
+    }
+    else if <yaml[<player.uuid>].read[Berserker.Skills.Leap]> == 1 {
+      - yaml id:<player.uuid> set <player.flag[Class]>.Skills.Leap:0
+      - inventory set origin:i@Unassigned_Skill slot:<player.inventory.find[i@Leap]>
+      - inventory open d:in@<player.flag[Class]>_Skills_Menu
+    }
+    else {
+      - yaml id:<player.uuid> set <player.flag[Class]>.Skills.Leap:0
+      - inject Skill_Limit_Check
+      - yaml id:<player.uuid> set <player.flag[Class]>.Skills.Leap:1
+      - inventory set origin:i@Leap slot:<player.inventory.find[i@Unassigned_Skill]>
+      - inventory open d:in@<player.flag[Class]>_Skills_Menu
+    }
 
 Class_Health_Handler:
   type: world
@@ -67,11 +130,11 @@ Class_Health_Handler:
 
 Leap:
   type: item
-  debug: true
+  debug: false
   material: 443
-  display name: <&c><&l>Leap
+  display name: <&c><&l>Leap 
   lore:
-  - <&e>Default Skill
+  - <&a>Optional Skill <&7><&l>[<yaml[<player.uuid>].read[Berserker.Skills.Leap].as_int||0>/1]
   - <&sp>
   - <&2>Type<&co> <&a>[Launch] <&6>Mobility
   - <&2>Description<&co> <&6>Leap forward stunning everybody
@@ -104,7 +167,7 @@ Leap_Effect:
     }
     - foreach <player.location.find.living_entities.within[<s@Berserker_Skill_Config.yaml_key[Leap_Radius].as_decimal||2>].exclude[<player>]> {
       - run Stun_Effect def:<s@Berserker_Skill_Config.yaml_key[Overpower_Stun_Duration].as_decimal||2.5>|<def[value]>
-      - hurt <s@Berserker_Skill_Config.yaml_key[Leap_Damage].as_int||5> <def[Value]> cause:CUSTOM source:<player>
+      - hurt <s@Berserker_Skill_Config.yaml_key[Leap_Damage].as_int||5> <def[Value]> cause:custom 
     }
     - define Location <player.location.below>
     - playsound <def[Location]> sound:ENTITY_ENDERDRAGON_FIREBALL_EXPLODE volume:50 pitch:1
@@ -119,7 +182,7 @@ Overpower:
   material: 385
   display name: <&c><&l>Overpower
   lore:
-  - <&e>Default Skill
+  - <&e>Default Skill <&7><&l>[1/1]
   - <&sp> 
   - <&2>Type<&co> <&a>[Targeted] <&6>Damage and CC
   - <&2>Description<&co> <&6>Dash forward bashing into 
@@ -132,20 +195,26 @@ Overpower_Cast:
   debug: false
   speed: 0
   script:
-    - if <player.has_flag[Overpower_Cooldown]> {
-      - narrate "<&a><&l>[Skill] <&f>Overpower <&7>has <&f><player.flag[Overpower_Cooldown].expiration.in_seconds.round_to[1]>s <&7>until it's ready!"
-      - queue clear
-    }
     - if !<player.has_flag[Enraged]> {
       - narrate "<&a><&l>[Skill] <&7>You are not <&f>Enraged<&7>!"
       - queue clear
     }
     - define target <player.target.within[<s@Berserker_Skill_Config.yaml_key[Overpower_Range].as_int||5>]>
-    - if <def[target]> != null && <def[target].name> != ARMOR_STAND {
-      - run Stun_Effect def:<s@Berserker_Skill_Config.yaml_key[Overpower_Stun_Duration].as_decimal||2>|<def[target]>
-      - push <player> destination:<def[target].location.add[0,0.3,0]> speed:0.8 duration:1t no_rotate no_damage
-      - hurt <s@Berserker_Skill_Config.yaml_key[Overpower_Damage].as_int||15> <def[target]> cause:CUSTOM source:<player>
-      - playeffect <def[target].location.add[0,1,0]> effect:blockcrack_152 visibility:25 quantity:15 offset:0.4
+    - if <def[target]> != null {
+      - if <def[target].entity_type> == ARMOR_STAND {
+        - define new_target <def[target].location.find.living_entities.within[1].exclude[<player>|<def[target]>].get[1]>
+        - run Stun_Effect def:<s@Berserker_Skill_Config.yaml_key[Overpower_Stun_Duration].as_decimal||2>|<def[new_target]>
+        - push <player> destination:<def[new_target].location.add[0,0.3,0]> speed:0.8 duration:1t no_rotate no_damage
+        - hurt <s@Berserker_Skill_Config.yaml_key[Overpower_Damage].as_int||15> <def[new_target]> cause:custom 
+        - playeffect <def[new_target].location.add[0,1,0]> effect:blockcrack_152 visibility:25 quantity:15 offset:0.4
+        - define target <def[new_target]>
+      }
+      else {
+        - run Stun_Effect def:<s@Berserker_Skill_Config.yaml_key[Overpower_Stun_Duration].as_decimal||2>|<def[target]>
+        - push <player> destination:<def[target].location.add[0,0.3,0]> speed:0.8 duration:1t no_rotate no_damage
+        - hurt <s@Berserker_Skill_Config.yaml_key[Overpower_Damage].as_int||15> <def[target]> cause:custom 
+        - playeffect <def[target].location.add[0,1,0]> effect:blockcrack_152 visibility:25 quantity:15 offset:0.4
+      }
     }
     else {
       - queue clear
@@ -157,7 +226,7 @@ BattleCry:
   material: 2260
   display name: <&c><&l>BattleCry
   lore:
-  - <&e>Default Skill
+  - <&e>Default Skill <&7><&l>[1/1]
   - <&sp>
   - <&2>Type<&co> <&a>[Self Cast] <&6>Damage buff + AoE interrupt
   - <&2>Description<&co> <&6>Let out a terrifying howl interrupting 
@@ -171,13 +240,9 @@ BattleCry:
 
 BattleCry_Cast:
   type: task
-  debug: true
+  debug: false
   speed: 0
   script:
-    - if <player.has_flag[BattleCry_Cooldown]> {
-      - narrate "<&a><&l>[Skill] <&f>BattleCry <&7>has <&f><player.flag[BattleCry_Cooldown].expiration.in_seconds.round_to[1]>s <&7>until it's ready!"
-      - queue clear
-    }
     - playeffect <player.location.add[0,1,0]> effect:NOTE visibility:25 quantity:5 offset:0.4
     - playsound <player.location> sound:ENTITY_POLAR_BEAR_WARNING volume:1.5 pitch:0.7
     - flag player Enraged duration:6
@@ -190,7 +255,7 @@ Cleave:
   material: iron_axe
   display name: <&c><&l>Cleave
   lore:
-  - <&e>Default Skill
+  - <&e>Default Skill <&7><&l>[1/1]
   - <&sp>
   - <&2>Type<&co> <&a>[Cone Attack] <&6>Cone damage 
   - <&2>Description<&co> <&6>Do a powerful cleaving strike 
@@ -201,13 +266,9 @@ Cleave_Cast:
   debug: false
   speed: 0
   script:
-    - if <player.has_flag[Cleave_Cooldown]> {
-      - narrate "<&a><&l>[Skill] <&f>Cleave <&7>has <&f><player.flag[Cleave_Cooldown].expiration.in_seconds.round_to[1]>s <&7>until it's ready!"
-      - queue clear
-    }
     - playeffect <player.location.cursor_on[2].sub[0,0.5,0]> effect:SWEEP_ATTACK quantity:2 offset:0.2
     - foreach <player.location.find.living_entities.within[<s@Berserker_Skill_Config.yaml_key[Cleave_Range].as_int||6>].exclude[<player>]> {
       - if <player.location.facing[<def[Value]>]> {
-        - hurt <s@Berserker_Skill_Config.yaml_key[Cleave_Damage].as_int||5> <def[Value]> cause:CUSTOM source:<player> 
+        - hurt <s@Berserker_Skill_Config.yaml_key[Cleave_Damage].as_int||5> <def[Value]> cause:custom
       }
     }

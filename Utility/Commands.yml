@@ -679,7 +679,7 @@ I_Command:
     }
   }
   else if <context.args.size> == 2 {
-    - if i@<context.args.get[1]> !matches item {
+    - if <context.args.get[1]> !matches item {
       - narrate "<&7>No item can be found by that name!"
       - queue clear
     }

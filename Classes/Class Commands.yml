@@ -14,14 +14,17 @@ Class_Commands:
     - if <context.args.get[1]> == skills && <player.flag[Class]> != Citizen {
       - inventory open d:in@<player.flag[Class]>_Skills_Menu
     }
-    else {
+    else if <player.flag[Class]> == Citizen || !<player.has_flag[Class]> {
       - narrate "<&a><&l>[Class] <&7>You currently do not have any class set!"
+    }
+    else {
+     - narrate "<&a><&l>[Class] <&7>Invalid command."
     }
   }
 
 Cast_Command:
   type: command
-  debug: true
+  debug: false
   name: Cast
   description: 
   permission: class.cast
@@ -44,6 +47,7 @@ Cast_Command:
 
 Class_Select_Menu:
   type: Inventory
+  debug: false
   inventory: HOPPER
   title: <&6><&l>Select a class<&co>
   slots:
@@ -84,6 +88,7 @@ Class_Select_Menu_Handler:
 
 Berserker_Icon:
   type: item
+  debug: false
   material: iron_axe
   display name: <&c>Berserker
   lore:

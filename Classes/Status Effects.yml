@@ -1,17 +1,29 @@
 ## <def[1]> is the duration ## <def[2]> is the target ##
 
+Combat_Effect:
+  type: world
+  debug: true
+  events:
+    on player damages entity:
+    - flag <context.damager> In_Combat duration:20s
+    - if <context.entity> == player {
+      - flag <context.entity> In_Combat duration:20s
+    }
+
 Stun_Effect:
   type: task
   debug: false
   speed: 0
   script:
     - flag <def[2]> Stun_Effect duration:<def[1].as_duration>
-    - spawn e@armor_stand[visible=false;marker=true;gravity=false] <def[2].location.add[0,0.3,0]> save:marker
+    - spawn e@armor_stand[visible=false;marker=true;gravity=false] <def[2].location> save:marker
     - mount <def[2]>|<entry[marker].spawned_entities.get[1]> <def[2].location>
     - run Stun_Message def:<def[1]>|<def[2]>
     - wait <def[1].as_duration>
+    - if <player.has_flag[Stun_Effect]> {
+      - teleport <def[2]> <def[2].location.add[0,0.8,0]>
+    }
     - flag <def[2]> Stun_Effect:!
-    - teleport <def[2]> <def[2].location.add[0,0.8,0]>
     - wait 1t
     - remove <entry[marker].spawned_entities.get[1]>
 
