@@ -1,0 +1,9 @@
+Target_Check:
+  type: task
+  debug: false
+  speed: 0
+  script:
+    - if <yaml[<def[target].uuid>].read[faction.name]||Outlaw1> == <yaml[player.uuid>].read[faction.name]||Outlaw2> && <yaml[<def[target].uuid>].read[faction.outlaw]||False> == False {
+      - queue clear
+    }
+    ### Add Anti PvP hopping eventually

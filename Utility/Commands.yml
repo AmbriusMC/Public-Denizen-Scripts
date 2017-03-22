@@ -568,7 +568,7 @@ Spectator_Icon:
 Exit_Icon:
   type: item
   material: barrier
-  display name: <&7>Exit
+  display name: <&6>Exit
   lore:
   - <&a>Click here to exit the menu.
 

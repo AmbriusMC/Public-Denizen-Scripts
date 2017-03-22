@@ -78,7 +78,7 @@ Class_Select_Menu_Handler:
     - give i@Unassigned_Skill slot:4
     - give i@Unassigned_Skill slot:5
     - give i@Unassigned_Skill slot:6
-    - adjust <player> max_health:"<s@Berserker_Stats_Config.yaml_key[Health].as_int||150>
+    - adjust <player> max_health:<s@Berserker_Stat_Config.yaml_key[Health].as_int||150>
     - adjust <player> scale_health:true
     - adjust <player> health:<player.health.max>
     - flag player Class:Berserker

@@ -1,0 +1,55 @@
+Selection_Process:
+  type: task
+  debug: false
+  speed: 0
+  script:
+    - if <yaml[<player.uuid>].read[<player.flag[Class]>.Skills.<context.item.scriptname.to_titlecase>]> == 0 {
+      - inject Skill_Limit_Check
+      - yaml id:<player.uuid> set <player.flag[Class]>.Skills.<context.item.scriptname.to_titlecase>:1
+      - inventory set origin:<context.item> slot:<player.inventory.find[i@Unassigned_Skill]>
+      - inventory open d:in@<player.flag[Class]>_Skills_Menu
+    }
+    else if <yaml[<player.uuid>].read[<player.flag[Class]>.Skills.<context.item.scriptname.to_titlecase>]> == 1 {
+      - yaml id:<player.uuid> set <player.flag[Class]>.Skills.<context.item.scriptname.to_titlecase>:0
+      - inventory set origin:i@Unassigned_Skill slot:<player.inventory.find[<context.item>]>
+      - inventory open d:in@<player.flag[Class]>_Skills_Menu
+    }
+    else {
+      - yaml id:<player.uuid> set <player.flag[Class]>.Skills.<context.item.scriptname.to_titlecase>:0
+      - inject Skill_Limit_Check
+      - yaml id:<player.uuid> set <player.flag[Class]>.Skills.<context.item.scriptname.to_titlecase>:1
+      - inventory set origin:<context.item> slot:<player.inventory.find[i@Unassigned_Skill]>
+      - inventory open d:in@<player.flag[Class]>_Skills_Menu
+    }
+
+Skill_Limit_Check:
+  type: task
+  debug: false
+  speed: 0
+  script:
+    - foreach <yaml[<player.uuid>].list_keys[<player.flag[Class]>.Skills]> {
+      - define Check 0
+      - if <yaml[<player.uuid>].read[<player.flag[Class]>.Skills.<def[value]>]> == 1 {
+        - define Check <def[Check].add[1]>
+      }
+    }
+    - if <def[Check]> > 3 {
+      - narrate "<&a><&l>[Class] <&7>You already have <&f>3 <&7>optional skills selected!"
+      - queue clear
+    }
+
+Skill_Bar_Management:
+  type: task
+  debug: true
+  speed: 0
+  script:
+    - yaml id:<player.uuid> set <player.flag[Class]>.Skill_Bar.Skills:<player.inventory.slot[1]>|<player.inventory.slot[2]>|<player.inventory.slot[3]>|<player.inventory.slot[4]>|<player.inventory.slot[5]>|<player.inventory.slot[6]>
+
+Filler_Icon:
+  type: item
+  debug: false
+  material: stained_glass_pane
+  display name: <&6><&sp><&sp><&sp><&sp>Skill Bar
+  lore:
+  - <&e><&sp>-----------
+  - <&a>Available Skills

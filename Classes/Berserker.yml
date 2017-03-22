@@ -1,6 +1,7 @@
 Berserker_Stat_Config:
   type: yaml data
   Class_Resource: Rage
+  Default_Skill_List: li@i@Cleave|i@BattleCry|i@Overpower|i@Unassigned_Skill|i@Unassigned_Skill|i@Unassigned_Skill
   Health: 150
   Melee Damage: 8
 
@@ -72,42 +73,31 @@ Berserker_Skills_Menu:
   type: Inventory
   debug: false
   title: <&6><&l>Berserker Skills<&co>
-  size: 18
+  size: 36
   slots:
+  - "[<player.inventory.slot[1]>] [<player.inventory.slot[2]>] [<player.inventory.slot[3]>] [<player.inventory.slot[4]>] [<player.inventory.slot[5]>] [<player.inventory.slot[6]>] [] [] [i@Exit_Icon]"
+  - "[i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon]"
   - "[i@red_dye] [i@Cleave] [i@BattleCry] [i@Overpower] [] [] [] [] []"
   - "[i@Leap] [] [] [] [] [] [] [] []"
 
 Berserker_Skills_Menu_Handler:
   type: world
-  debug: true
+  debug: false
   events:
     on player clicks in Berserker_Skills_Menu:
     - determine cancelled
     on player drags in Berserker_Skills_Menu:
     - determine cancelled
     on player clicks Leap in Berserker_Skills_Menu:
-    - if <yaml[<player.uuid>].read[Berserker.Skills.Leap]> == 0 {
-      - inject Skill_Limit_Check
-      - yaml id:<player.uuid> set <player.flag[Class]>.Skills.Leap:1
-      - inventory set origin:i@Leap slot:<player.inventory.find[i@Unassigned_Skill]>
-      - inventory open d:in@<player.flag[Class]>_Skills_Menu
-    }
-    else if <yaml[<player.uuid>].read[Berserker.Skills.Leap]> == 1 {
-      - yaml id:<player.uuid> set <player.flag[Class]>.Skills.Leap:0
-      - inventory set origin:i@Unassigned_Skill slot:<player.inventory.find[i@Leap]>
-      - inventory open d:in@<player.flag[Class]>_Skills_Menu
-    }
-    else {
-      - yaml id:<player.uuid> set <player.flag[Class]>.Skills.Leap:0
-      - inject Skill_Limit_Check
-      - yaml id:<player.uuid> set <player.flag[Class]>.Skills.Leap:1
-      - inventory set origin:i@Leap slot:<player.inventory.find[i@Unassigned_Skill]>
-      - inventory open d:in@<player.flag[Class]>_Skills_Menu
-    }
+    - inject Selection_Process
+    on player clicks Exit_Icon in Berserker_Skills_Menu:
+    - inventory close
+    on player closes Berserker_Skills_Menu:
+    - inject Skill_Bar_Management
 
 Class_Health_Handler:
   type: world
-  debug: false
+  debug: true
   events:
     on player logs in:
     - wait 1t
@@ -121,12 +111,21 @@ Class_Health_Handler:
     - foreach '<player.inventory.list_contents.with_lore[Optional Skill]>' {
       - take <def[value]> quantity:64
     }
-    - give i@Cleave slot:1
-    - give i@BattleCry slot:2
-    - give i@Overpower slot:3
-    - give i@Unassigned_Skill slot:4
-    - give i@Unassigned_Skill slot:5
-    - give i@Unassigned_Skill slot:6
+    - if <yaml[<player.uuid>].contains[<player.flag[Class]>.Skill_Bar.Skills]> {
+      - define Slot 1
+      - foreach <yaml[<player.uuid>].read[<player.flag[Class]>.Skill_Bar.Skills]> {
+        - inventory set origin:<def[value]> slot:<def[Slot]>
+        - define Slot <def[Slot].add[1]>
+      }
+    }
+    else {
+      - define Slot 1
+      - define Stat_Config s@<player.flag[Class]>_Stat_Config
+      - foreach <def[Stat_Config].yaml_key[Default_Skill_List]> {
+        - inventory set origin:<def[value]> slot:<def[Slot]>
+        - define Slot <def[Slot].add[1]>
+      }
+    }
 
 Leap:
   type: item
@@ -134,7 +133,7 @@ Leap:
   material: 443
   display name: <&c><&l>Leap 
   lore:
-  - <&a>Optional Skill <&7><&l>[<yaml[<player.uuid>].read[Berserker.Skills.Leap].as_int||0>/1]
+  - <&a>Optional Skill
   - <&sp>
   - <&2>Type<&co> <&a>[Launch] <&6>Mobility
   - <&2>Description<&co> <&6>Leap forward stunning everybody
@@ -182,7 +181,7 @@ Overpower:
   material: 385
   display name: <&c><&l>Overpower
   lore:
-  - <&e>Default Skill <&7><&l>[1/1]
+  - <&e>Default Skill <&7><&l>
   - <&sp> 
   - <&2>Type<&co> <&a>[Targeted] <&6>Damage and CC
   - <&2>Description<&co> <&6>Dash forward bashing into 
@@ -226,7 +225,7 @@ BattleCry:
   material: 2260
   display name: <&c><&l>BattleCry
   lore:
-  - <&e>Default Skill <&7><&l>[1/1]
+  - <&e>Default Skill <&7><&l>
   - <&sp>
   - <&2>Type<&co> <&a>[Self Cast] <&6>Damage buff + AoE interrupt
   - <&2>Description<&co> <&6>Let out a terrifying howl interrupting 
@@ -248,14 +247,13 @@ BattleCry_Cast:
     - flag player Enraged duration:6
     - flag player BattleCry_Cooldown duration:12
 
-
 Cleave:
   type: item
   debug: false
   material: iron_axe
   display name: <&c><&l>Cleave
   lore:
-  - <&e>Default Skill <&7><&l>[1/1]
+  - <&e>Default Skill <&7><&l>
   - <&sp>
   - <&2>Type<&co> <&a>[Cone Attack] <&6>Cone damage 
   - <&2>Description<&co> <&6>Do a powerful cleaving strike 

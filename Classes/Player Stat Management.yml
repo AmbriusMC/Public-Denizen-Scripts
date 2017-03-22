@@ -1,6 +1,6 @@
 File_Manager:
   type: world
-  debug: true
+  debug: false
   events:
     on player login:
     - if <server.has_file[/Players/<player.uuid>.yml]> {
@@ -21,19 +21,3 @@ File_Manager:
     - foreach <server.list_online_players> {
       - yaml "savefile:/Players/<player.uuid>.yml" id:<player.uuid>
     }
-
-Skill_Limit_Check:
-  type: task
-  debug: true
-  speed: 0
-  script:
-  - foreach <yaml[<player.uuid>].list_keys[<player.flag[Class]>.Skills]> {
-    - define Check 0
-    - if <yaml[<player.uuid>].read[<player.flag[Class]>.Skills.<def[value]>]> == 1 {
-      - define Check <def[Check].add[1]>
-    }
-  }
-  - if <def[Check]> > 3 {
-    - narrate "<&a><&l>[Class] <&7>You already have <&f>3 <&7>optional skills selected!"
-    - queue clear
-  }

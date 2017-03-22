@@ -28,7 +28,7 @@ Skillbar_Handler:
         }
       }
     }
-    on player clicks in inventory: #### NEEDS TO BE FIXED ####
+    on player clicks in inventory:
     - if <player.gamemode.id> == 2 && <context.slot> <= 6 {
       - foreach <context.item.lore> {
         - if <def[value]> contains Default Skill || <def[value]> contains Unassigned Skill || <def[value]> contains Optional Skill {
