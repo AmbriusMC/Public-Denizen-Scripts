@@ -2,7 +2,7 @@
 
 Combat_Effect:
   type: world
-  debug: true
+  debug: false
   events:
     on player damages entity:
     - flag <context.damager> In_Combat duration:20s

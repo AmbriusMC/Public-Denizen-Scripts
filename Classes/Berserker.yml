@@ -25,9 +25,16 @@ Berserker_Skill_Config:
   Overpower_Message: "<&a><&l>[Skill] <&f><player.name> <&7>has used <&f><def[Skill].to_titlecase> <&7>on <&f><def[target].name><&7>!"
   ## Leap ##
   Leap_Damage: 20
-  Leap_Cooldown: 3
+  Leap_Cooldown: 20
   Leap_Stun_Duration: 2.5
   Leap_Radius: 3
+  Leap_Cost: 0
+  ## AxeThrow ##
+  AxeThrow_Cooldown: 10
+  AxeThrow_Ticks: 5
+  AxeThrow_Period: 3
+  AxeThrow_Damage: 5
+  AxeThrow_Cost: 3
 
 Berserker_World_Handler:
   type: world
@@ -71,14 +78,14 @@ Berserker_World_Handler:
 
 Berserker_Skills_Menu:
   type: Inventory
-  debug: false
+  debug: true
   title: <&6><&l>Berserker Skills<&co>
   size: 36
   slots:
-  - "[<player.inventory.slot[1]>] [<player.inventory.slot[2]>] [<player.inventory.slot[3]>] [<player.inventory.slot[4]>] [<player.inventory.slot[5]>] [<player.inventory.slot[6]>] [] [] [i@Exit_Icon]"
+  - "[i@<player.inventory.slot[1]>[quantity=1]] [i@<player.inventory.slot[2]>[quantity=1]] [i@<player.inventory.slot[3]>[quantity=1]] [i@<player.inventory.slot[4]>[quantity=1]] [i@<player.inventory.slot[5]>[quantity=1]] [i@<player.inventory.slot[6]>[quantity=1]] [] [] [i@Exit_Icon]"
   - "[i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon]"
   - "[i@red_dye] [i@Cleave] [i@BattleCry] [i@Overpower] [] [] [] [] []"
-  - "[i@Leap] [] [] [] [] [] [] [] []"
+  - "[i@Leap] [i@AxeThrow] [] [] [] [] [] [] []"
 
 Berserker_Skills_Menu_Handler:
   type: world
@@ -89,6 +96,8 @@ Berserker_Skills_Menu_Handler:
     on player drags in Berserker_Skills_Menu:
     - determine cancelled
     on player clicks Leap in Berserker_Skills_Menu:
+    - inject Selection_Process
+    on player clicks AxeThrow in Berserker_Skills_Menu:
     - inject Selection_Process
     on player clicks Exit_Icon in Berserker_Skills_Menu:
     - inventory close
@@ -127,6 +136,47 @@ Class_Health_Handler:
       }
     }
 
+AxeThrow:
+  type: item
+  debug: false
+  material: 279
+  display name: <&c><&l>AxeThrow
+  lore:
+  - <&a>Optional Skill
+  - <&2>Type<&co> <&a>[Skill Shot] <&6>DoT
+  - <&2>Description<&co> <&6>Hurl an axe in the direction that you 
+  - <&6>are facing, dealing damage for a duration to the 
+  - <&6>target that it hits.
+
+AxeThrow_Cast:
+  type: task
+  debug: false
+  speed: 0
+  script:
+    - shoot e@item_projectile[item=i@279] origin:<player.location.add[0,1.3,0]> speed:1.8 shooter:<player> script:AxeThrow_Effect no_rotate
+
+AxeThrow_Effect:
+  type: task
+  debug: false
+  speed: 0
+  script:
+    - remove <def[last_entity]>
+    - if <def[hit_entities].is_empty> {
+      - queue clear
+    }
+    - define Target <def[hit_entities].get[1]>
+    - if <def[hit_entities].get[1]> == <player> {
+      - define Target <player.location.find.living_entities.within[3].exclude[<player>].get[1]||null>
+    }
+    - if <def[Target]> == null {
+      - queue clear
+    }
+    - repeat <s@Berserker_Skill_Config.yaml_key[AxeThrow_Ticks].as_int||5> {
+      - hurt <s@Berserker_Skill_Config.yaml_key[AxeThrow_Damage].as_int||5> <def[Target]> cause:custom
+      - playeffect <def[Target].location> effect:iconcrack_331 quantity:10 offset:0.3
+      - wait <s@Berserker_Skill_Config.yaml_key[AxeThrow_Period].as_duration||2s>
+    }
+
 Leap:
   type: item
   debug: false
@@ -145,6 +195,9 @@ Leap_Cast:
   debug: false
   speed: 0
   script:
+    - if <player.location.below.material> == m@air {
+      - queue clear
+    }
     - if <player.has_flag[Leap_Cooldown]> {
       - narrate "<&a><&l>[Skill] <&f>Leap <&7>has <&f><player.flag[Leap_Cooldown].expiration.in_seconds.round_to[1]>s <&7>until it's ready!"
       - queue clear
@@ -156,7 +209,7 @@ Leap_Effect:
   debug: false
   speed: 0
   script:
-    - flag player In_Air duration:5s
+    - flag player In_Air duration:10s
     - wait 10t
     - while <player.has_flag[In_Air]> {      
       - if <player.location.below.material> != m@air {
@@ -165,8 +218,9 @@ Leap_Effect:
       - wait 1t
     }
     - foreach <player.location.find.living_entities.within[<s@Berserker_Skill_Config.yaml_key[Leap_Radius].as_decimal||2>].exclude[<player>]> {
-      - run Stun_Effect def:<s@Berserker_Skill_Config.yaml_key[Overpower_Stun_Duration].as_decimal||2.5>|<def[value]>
-      - hurt <s@Berserker_Skill_Config.yaml_key[Leap_Damage].as_int||5> <def[Value]> cause:custom 
+      - define Target <def[Value]>
+      - run Stun_Effect def:<s@Berserker_Skill_Config.yaml_key[Overpower_Stun_Duration].as_decimal||2.5>|<def[Target]>
+      - hurt <s@Berserker_Skill_Config.yaml_key[Leap_Damage].as_int||5> <def[Target]> cause:custom 
     }
     - define Location <player.location.below>
     - playsound <def[Location]> sound:ENTITY_ENDERDRAGON_FIREBALL_EXPLODE volume:50 pitch:1

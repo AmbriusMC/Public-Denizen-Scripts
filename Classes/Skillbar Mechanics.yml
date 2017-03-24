@@ -69,14 +69,14 @@ Cast_Sequence:
       - queue clear
     }
     - inject <def[Skill]>_Cast
-    - flag player <def[Skill_Cooldown]> duration:<def[Class_Skill_Config].yaml_key[<def[Skill_Cooldown]>].as_int||4>
+    - flag player <def[Skill_Cooldown]> duration:<def[Class_Skill_Config].yaml_key[<def[Skill_Cooldown]>].as_int||10>
     - define Message "<def[Class_Skill_Config].yaml_key[<def[Skill]>_Message]||<&a><&l>[Skill] <&f><player.name> <&7>has used <&f><def[Skill]><&7>!>"
     - narrate "<parse:<def[Message]>>" targets:<player.location.find.players.within[25]>
-    - repeat <def[Class_Skill_Config].yaml_key[<def[Skill_Cooldown]>].as_int||10> {
+    - repeat <def[Class_Skill_Config].yaml_key[<def[Skill_Cooldown]>].as_int.mul[1.5]||15> {
       - adjust <player.inventory.slot[<def[Skill_Slot]>]> quantity:<player.flag[<def[Skill_Cooldown]>].expiration.in_seconds.round> save:Cooldown
       - take slot:<def[Skill_Slot]>
       - inventory set origin:<entry[Cooldown].result> slot:<def[Skill_Slot]>
-      - wait 1s
+      - wait 0.75s
     }
 
 Unassigned_Skill:

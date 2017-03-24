@@ -7,3 +7,10 @@ Target_Check:
       - queue clear
     }
     ### Add Anti PvP hopping eventually
+
+Damage_Management:
+  type: world
+  debug: false
+  events:
+    on player damaged by FALL:
+    - determine cancelled
