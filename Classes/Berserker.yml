@@ -1,7 +1,7 @@
 Berserker_Stat_Config:
   type: yaml data
   Class_Resource: Rage
-  Default_Skill_List: li@i@Cleave|i@BattleCry|i@Overpower|i@Unassigned_Skill|i@Unassigned_Skill|i@Unassigned_Skill
+  Default_Skill_List: li@i@Cleave|i@BattleCry|i@Overpower
   Health: 150
   Melee Damage: 8
 
@@ -78,13 +78,13 @@ Berserker_World_Handler:
 
 Berserker_Skills_Menu:
   type: Inventory
-  debug: true
+  debug: false
   title: <&6><&l>Berserker Skills<&co>
   size: 36
   slots:
-  - "[i@<player.inventory.slot[1]>[quantity=1]] [i@<player.inventory.slot[2]>[quantity=1]] [i@<player.inventory.slot[3]>[quantity=1]] [i@<player.inventory.slot[4]>[quantity=1]] [i@<player.inventory.slot[5]>[quantity=1]] [i@<player.inventory.slot[6]>[quantity=1]] [] [] [i@Exit_Icon]"
+  - "[i@<player.inventory.slot[1].scriptname>[quantity=1]] [i@<player.inventory.slot[2].scriptname>[quantity=1]] [i@<player.inventory.slot[3].scriptname>[quantity=1]] [i@<player.inventory.slot[4].scriptname>[quantity=1]] [i@<player.inventory.slot[5].scriptname>[quantity=1]] [i@<player.inventory.slot[6].scriptname>[quantity=1]] [] [] [i@Exit_Icon]"
   - "[i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon]"
-  - "[i@red_dye] [i@Cleave] [i@BattleCry] [i@Overpower] [] [] [] [] []"
+  - "[i@Cleave] [i@BattleCry] [i@Overpower] [i@red_dye] [] [] [] [] []"
   - "[i@Leap] [i@AxeThrow] [] [] [] [] [] [] []"
 
 Berserker_Skills_Menu_Handler:
@@ -95,46 +95,21 @@ Berserker_Skills_Menu_Handler:
     - determine cancelled
     on player drags in Berserker_Skills_Menu:
     - determine cancelled
+    on player clicks Cleave in Berserker_Skills_Menu:
+    - inject Selection_Process
+    on player clicks BattleCry in Berserker_Skills_Menu:
+    - inject Selection_Process
+    on player clicks Overpower in Berserker_Skills_Menu:
+    - inject Selection_Process
     on player clicks Leap in Berserker_Skills_Menu:
     - inject Selection_Process
     on player clicks AxeThrow in Berserker_Skills_Menu:
     - inject Selection_Process
     on player clicks Exit_Icon in Berserker_Skills_Menu:
     - inventory close
+    - inject Skill_Bar_Management
     on player closes Berserker_Skills_Menu:
     - inject Skill_Bar_Management
-
-Class_Health_Handler:
-  type: world
-  debug: true
-  events:
-    on player logs in:
-    - wait 1t
-    - adjust <player> scale_health:true
-    - foreach '<player.inventory.list_contents.with_lore[Unassigned Skill]>' {
-      - take <def[value]> quantity:64
-    }
-    - foreach '<player.inventory.list_contents.with_lore[Default Skill]>' {
-      - take <def[value]> quantity:64
-    }
-    - foreach '<player.inventory.list_contents.with_lore[Optional Skill]>' {
-      - take <def[value]> quantity:64
-    }
-    - if <yaml[<player.uuid>].contains[<player.flag[Class]>.Skill_Bar.Skills]> {
-      - define Slot 1
-      - foreach <yaml[<player.uuid>].read[<player.flag[Class]>.Skill_Bar.Skills]> {
-        - inventory set origin:<def[value]> slot:<def[Slot]>
-        - define Slot <def[Slot].add[1]>
-      }
-    }
-    else {
-      - define Slot 1
-      - define Stat_Config s@<player.flag[Class]>_Stat_Config
-      - foreach <def[Stat_Config].yaml_key[Default_Skill_List]> {
-        - inventory set origin:<def[value]> slot:<def[Slot]>
-        - define Slot <def[Slot].add[1]>
-      }
-    }
 
 AxeThrow:
   type: item
@@ -164,9 +139,9 @@ AxeThrow_Effect:
     - if <def[hit_entities].is_empty> {
       - queue clear
     }
-    - define Target <def[hit_entities].get[1]>
+    - define Target <def[hit_entities].get[1]||null>
     - if <def[hit_entities].get[1]> == <player> {
-      - define Target <player.location.find.living_entities.within[3].exclude[<player>].get[1]||null>
+      - define Target <player.target.within[4]||null>
     }
     - if <def[Target]> == null {
       - queue clear
@@ -195,14 +170,12 @@ Leap_Cast:
   debug: false
   speed: 0
   script:
-    - if <player.location.below.material> == m@air {
+    - if <player.location.below.material> != m@air || <player.location.material> != m@air {
+      - push <player> origin:<player.location> destination:<player.location.cursor_on[5].add[0,3,0]> speed:1.5 duration:1t script:Leap_Effect no_damage no_rotate
+    }
+    else {
       - queue clear
     }
-    - if <player.has_flag[Leap_Cooldown]> {
-      - narrate "<&a><&l>[Skill] <&f>Leap <&7>has <&f><player.flag[Leap_Cooldown].expiration.in_seconds.round_to[1]>s <&7>until it's ready!"
-      - queue clear
-    }
-    - push <player> origin:<player.location> destination:<player.location.cursor_on[5].add[0,3,0]> speed:1.5 duration:1t script:Leap_Effect no_damage no_rotate
 
 Leap_Effect:
   type: task
@@ -235,7 +208,7 @@ Overpower:
   material: 385
   display name: <&c><&l>Overpower
   lore:
-  - <&e>Default Skill <&7><&l>
+  - <&e>Default Skill
   - <&sp> 
   - <&2>Type<&co> <&a>[Targeted] <&6>Damage and CC
   - <&2>Description<&co> <&6>Dash forward bashing into 
@@ -279,7 +252,7 @@ BattleCry:
   material: 2260
   display name: <&c><&l>BattleCry
   lore:
-  - <&e>Default Skill <&7><&l>
+  - <&e>Default Skill
   - <&sp>
   - <&2>Type<&co> <&a>[Self Cast] <&6>Damage buff + AoE interrupt
   - <&2>Description<&co> <&6>Let out a terrifying howl interrupting 
@@ -307,7 +280,7 @@ Cleave:
   material: iron_axe
   display name: <&c><&l>Cleave
   lore:
-  - <&e>Default Skill <&7><&l>
+  - <&e>Default Skill
   - <&sp>
   - <&2>Type<&co> <&a>[Cone Attack] <&6>Cone damage 
   - <&2>Description<&co> <&6>Do a powerful cleaving strike 

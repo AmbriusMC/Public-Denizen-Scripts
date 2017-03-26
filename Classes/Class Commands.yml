@@ -63,21 +63,7 @@ Class_Select_Menu_Handler:
     - determine cancelled
     on player clicks Berserker_Icon in Class_Select_Menu:
     - inventory close
-    - foreach '<player.inventory.list_contents.with_lore[Unassigned Skill]>' {
-      - take <def[value]> quantity:64
-    }
-    - foreach '<player.inventory.list_contents.with_lore[Default Skill]>' {
-      - take <def[value]> quantity:64
-    }
-    - foreach '<player.inventory.list_contents.with_lore[Optional Skill]>' {
-      - take <def[value]> quantity:64
-    }
-    - give i@Cleave slot:1
-    - give i@BattleCry slot:2
-    - give i@Overpower slot:3
-    - give i@Unassigned_Skill slot:4
-    - give i@Unassigned_Skill slot:5
-    - give i@Unassigned_Skill slot:6
+    - inject Skill_Bar_Setup
     - adjust <player> max_health:<s@Berserker_Stat_Config.yaml_key[Health].as_int||150>
     - adjust <player> scale_health:true
     - adjust <player> health:<player.health.max>

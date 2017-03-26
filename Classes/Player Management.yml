@@ -1,0 +1,75 @@
+File_Manager:
+  type: world
+  debug: false
+  events:
+    on player login:
+    - if <server.has_file[/Players/<player.uuid>.yml]> {
+      - yaml "load:/Players/<player.uuid>.yml" id:<player.uuid>
+    }
+    else {
+      - yaml create id:<player.uuid>
+      - yaml id:<player.uuid> set General.Mana:0
+    }
+    on player quits:
+    - yaml "savefile:/Players/<player.uuid>.yml" id:<player.uuid>
+    - yaml unload id:<player.uuid>
+    on shutdown:
+    - foreach <server.list_online_players> {
+      - yaml "savefile:/Players/<def[value].uuid>.yml" id:<def[value].uuid>
+    }
+    on system minutely:
+    - foreach <server.list_online_players> {
+      - yaml "savefile:/Players/<player.uuid>.yml" id:<player.uuid>
+    }
+
+Class_Login_Handler:
+  type: world
+  debug: false
+  events:
+    on player logs in:
+    - wait 1t
+    - adjust <player> scale_health:true
+    - inject Skill_Bar_Setup
+
+Gamemode_Handler:
+  type: world
+  debug: true
+  events:
+    on player changes gamemode:
+    - inject Skill_Bar_Setup
+
+Skill_Bar_Setup:
+  type: task
+  debug: true
+  speed: 0
+  script:
+    - foreach '<player.inventory.list_contents.with_lore[Default Skill]>' {
+      - take <def[value]> quantity:64
+    }
+    - foreach '<player.inventory.list_contents.with_lore[Optional Skill]>' {
+      - take <def[value]> quantity:64
+    }
+    - foreach '<player.inventory.list_contents.with_lore[Unassigned Skill]>' {
+      - take <def[value]> quantity:64
+    }
+    - wait 1t
+    - if <player.gamemode.id> == 2 {
+      - if <yaml[<player.uuid>].contains[<player.flag[Class]>.Skill_Bar.Skills]> {
+        - define Slot 1
+        - foreach <yaml[<player.uuid>].read[<player.flag[Class]>.Skill_Bar.Skills]> {
+          - inventory set origin:<def[value].scriptname.to_titlecase>[quantity=1] slot:<def[Slot]>
+          - define Slot <def[Slot].add[1]>
+        }
+      }
+      else {
+        - define Slot 1
+        - define Stat_Config s@<player.flag[Class]>_Stat_Config
+        - foreach <def[Stat_Config].yaml_key[Default_Skill_List]> {
+          - inventory set origin:<def[value]> slot:<def[Slot]>
+          - define Slot <def[Slot].add[1]>
+        }
+        - inventory set origin:i@Unassigned_Skill slot:4
+        - inventory set origin:i@Unassigned_Skill slot:5
+        - inventory set origin:i@Unassigned_Skill slot:6
+      }
+    }
