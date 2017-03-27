@@ -24,7 +24,7 @@ Berserker_Skill_Config:
   Overpower_Cost: 3
   Overpower_Message: "<&a><&l>[Skill] <&f><player.name> <&7>has used <&f><def[Skill].to_titlecase> <&7>on <&f><def[target].name><&7>!"
   ## Leap ##
-  Leap_Damage: 20
+  Leap_Damage: 15
   Leap_Cooldown: 20
   Leap_Stun_Duration: 2.5
   Leap_Radius: 3
@@ -35,31 +35,19 @@ Berserker_Skill_Config:
   AxeThrow_Period: 3
   AxeThrow_Damage: 5
   AxeThrow_Cost: 3
+  ## Hamstring ##
+  Hamstring_Cooldown: 8
+  Hamstring_Duration: 5
+  Hamstring_Power: 1
+  Hamstring_Damage: 10
+  Hamstring_Debuff: 0.2
+  Hamstring_Cost: 0
+
 
 Berserker_World_Handler:
   type: world
   debug: false
   events:
-    on player login:
-    - wait 1s
-    - while <player.is_online> {
-      - define Mana <yaml[<player.uuid>].read[General.Mana].as_int>
-      - adjust <player> fake_experience:<def[Mana].div[20]>|<def[Mana]>
-      - if <player.flag[Class]> == Berserker {
-        - if !<player.has_flag[In_Combat]> {
-          - if <def[Mana]> >= 1 {
-            - yaml id:<player.uuid> set General.Mana:<def[Mana].sub[1]>
-            - define Mana <def[Mana].sub[1]>
-            - adjust <player> fake_experience:<def[Mana].div[20]>|<def[Mana]>
-          }
-          else if <def[Mana]> <= 1 {
-            - yaml id:<player.uuid> set General.Mana:0
-            - adjust <player> fake_experience:0.0|0
-          }
-        }
-      }
-      - wait 1s
-    }
     on player damages entity:
     - if <player.flag[Class]> == Berserker {
       - if <context.cause> == entity_attack {
@@ -85,7 +73,7 @@ Berserker_Skills_Menu:
   - "[i@<player.inventory.slot[1].scriptname>[quantity=1]] [i@<player.inventory.slot[2].scriptname>[quantity=1]] [i@<player.inventory.slot[3].scriptname>[quantity=1]] [i@<player.inventory.slot[4].scriptname>[quantity=1]] [i@<player.inventory.slot[5].scriptname>[quantity=1]] [i@<player.inventory.slot[6].scriptname>[quantity=1]] [] [] [i@Exit_Icon]"
   - "[i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon]"
   - "[i@Cleave] [i@BattleCry] [i@Overpower] [i@red_dye] [] [] [] [] []"
-  - "[i@Leap] [i@AxeThrow] [] [] [] [] [] [] []"
+  - "[i@Leap] [i@AxeThrow] [i@Hamstring] [] [] [] [] [] []"
 
 Berserker_Skills_Menu_Handler:
   type: world
@@ -105,11 +93,42 @@ Berserker_Skills_Menu_Handler:
     - inject Selection_Process
     on player clicks AxeThrow in Berserker_Skills_Menu:
     - inject Selection_Process
+    on player clicks Hamstring in Berserker_Skills_Menu:
+    - inject Selection_Process
     on player clicks Exit_Icon in Berserker_Skills_Menu:
     - inventory close
     - inject Skill_Bar_Management
     on player closes Berserker_Skills_Menu:
     - inject Skill_Bar_Management
+
+Hamstring:
+  type: item
+  debug: false
+  material: 318
+  display name: <&c><&l>Hamstring
+  lore:
+  - <&a>Optional Skill
+  - <&2>Type<&co> <&a>[On-Hit] <&6>Slow + Debuff
+  - <&2>Description<&co> <&6>Slow target and decrease melee damage.
+
+Hamstring_Cast:
+  type: task
+  debug: true
+  speed: 0
+  script:
+    - flag player Hamstring_Effect duration:5s
+
+Hamstring_Effect:
+  type: world
+  debug: true
+  events:
+    on player damages entity:
+    - if <context.damager.flag[Class]> == Berserker && <context.damager.has_flag[Hamstring_Effect]> {
+      - flag <context.damager> Hamstring_Effect:!
+      - define Target <context.entity>
+      - cast slow <def[Target]> duration:<s@Berserker_Skill_Config.yaml_key[Hamstring_Duration].as_duration||6s> power:<s@Berserker_Skill_Config.yaml_key[Hamstring_Power].as_int||1> hide_particles
+      - hurt <s@Berserker_Skill_Config.yaml_key[Hamstring_Damage].as_int||15> <def[Target]>
+    }
 
 AxeThrow:
   type: item

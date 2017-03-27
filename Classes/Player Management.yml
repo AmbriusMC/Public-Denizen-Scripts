@@ -11,9 +11,11 @@ File_Manager:
       - yaml id:<player.uuid> set General.Mana:0
     }
     on player quits:
+    - wait 1m
     - yaml "savefile:/Players/<player.uuid>.yml" id:<player.uuid>
     - yaml unload id:<player.uuid>
     on shutdown:
+    - wait 1m
     - foreach <server.list_online_players> {
       - yaml "savefile:/Players/<def[value].uuid>.yml" id:<def[value].uuid>
     }
@@ -30,6 +32,24 @@ Class_Login_Handler:
     - wait 1t
     - adjust <player> scale_health:true
     - inject Skill_Bar_Setup
+    - while <player.is_online> {
+      - define Mana <yaml[<player.uuid>].read[General.Mana].as_int>
+      - adjust <player> fake_experience:<def[Mana].div[20]>|<def[Mana]>
+      - if <player.flag[Class]> == Berserker {
+        - if !<player.has_flag[In_Combat]> {
+          - if <def[Mana]> >= 1 {
+            - yaml id:<player.uuid> set General.Mana:<def[Mana].sub[1]>
+            - define Mana <def[Mana].sub[1]>
+            - adjust <player> fake_experience:<def[Mana].div[20]>|<def[Mana]>
+          }
+          else if <def[Mana]> <= 1 {
+            - yaml id:<player.uuid> set General.Mana:0
+            - adjust <player> fake_experience:0.0|0
+          }
+        }
+      }
+      - wait 1s
+    }
 
 Gamemode_Handler:
   type: world
