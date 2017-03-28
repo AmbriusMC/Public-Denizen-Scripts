@@ -9,13 +9,12 @@ File_Manager:
     else {
       - yaml create id:<player.uuid>
       - yaml id:<player.uuid> set General.Mana:0
+      - yaml id:<player.uuid> set General.Name:<player.name>
     }
     on player quits:
-    - wait 1m
     - yaml "savefile:/Players/<player.uuid>.yml" id:<player.uuid>
     - yaml unload id:<player.uuid>
     on shutdown:
-    - wait 1m
     - foreach <server.list_online_players> {
       - yaml "savefile:/Players/<def[value].uuid>.yml" id:<def[value].uuid>
     }
@@ -31,9 +30,11 @@ Class_Login_Handler:
     on player logs in:
     - wait 1t
     - adjust <player> scale_health:true
+    - define Class_Stat_Config s@<player.flag[Class]>_Stat_Config
+    - yaml id:<player.uuid> set General.Mana:<def[Class_Stat_Config].yaml_key[Default_Mana]||0>
     - inject Skill_Bar_Setup
     - while <player.is_online> {
-      - define Mana <yaml[<player.uuid>].read[General.Mana].as_int>
+      - define Mana <yaml[<player.uuid>].read[General.Mana]>
       - adjust <player> fake_experience:<def[Mana].div[20]>|<def[Mana]>
       - if <player.flag[Class]> == Berserker {
         - if !<player.has_flag[In_Combat]> {
@@ -53,7 +54,7 @@ Class_Login_Handler:
 
 Gamemode_Handler:
   type: world
-  debug: true
+  debug: false
   events:
     on player changes gamemode:
     - inject Skill_Bar_Setup
@@ -77,7 +78,12 @@ Skill_Bar_Setup:
       - if <yaml[<player.uuid>].contains[<player.flag[Class]>.Skill_Bar.Skills]> {
         - define Slot 1
         - foreach <yaml[<player.uuid>].read[<player.flag[Class]>.Skill_Bar.Skills]> {
-          - inventory set origin:<def[value].scriptname.to_titlecase>[quantity=1] slot:<def[Slot]>
+          - if <def[Value].scriptname> matches script {
+            - inventory set origin:<def[Value]>[quantity=1] slot:<def[Slot]>
+          }
+          else {
+            - inventory set origin:i@Unassigned_Skill[quantity=1] slot:<def[Slot]>
+          }
           - define Slot <def[Slot].add[1]>
         }
       }

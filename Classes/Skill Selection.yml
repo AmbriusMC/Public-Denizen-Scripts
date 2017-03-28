@@ -3,8 +3,8 @@ Selection_Process:
   debug: false
   speed: 0
   script:
-    - if <player.has_flag[<context.item.scriptname>_Cooldown]> {
-      - narrate "<&a><&l>[Class] <&7>That skill is on cooldown for another <&f><player.flag[<context.item.scriptname>_Cooldown].expiration.in_seconds.round_to[1]>s<&7>!"
+    - if <player.has_flag[<context.item.scriptname.to_titlecase>_Cooldown]> {
+      - narrate "<&a><&l>[Class] <&7>That skill is on cooldown for another <&f><player.flag[<context.item.scriptname.to_titlecase>_Cooldown].expiration.in_seconds.round_to[1]>s<&7>!"
       - queue clear
     }
     - define Class_Stat_Config s@<player.flag[Class]>_Stat_Config
@@ -22,21 +22,21 @@ Selection_Process:
         }
       }
     }
-    - if <yaml[<player.uuid>].read[<player.flag[Class]>.Skills.<context.item.scriptname>]> == 0 {
+    - if <yaml[<player.uuid>].read[<player.flag[Class]>.Skills.<context.item.scriptname.to_titlecase>]> == 0 {
       - inject Skill_Limit_Check
-      - yaml id:<player.uuid> set <player.flag[Class]>.Skills.<context.item.scriptname>:1
+      - yaml id:<player.uuid> set <player.flag[Class]>.Skills.<context.item.scriptname.to_titlecase>:1
       - inventory set origin:<context.item> slot:<player.inventory.find[i@Unassigned_Skill]>
       - inventory open d:in@<player.flag[Class]>_Skills_Menu
     }
-    else if <yaml[<player.uuid>].read[<player.flag[Class]>.Skills.<context.item.scriptname>]> == 1 {
-      - yaml id:<player.uuid> set <player.flag[Class]>.Skills.<context.item.scriptname>:0
+    else if <yaml[<player.uuid>].read[<player.flag[Class]>.Skills.<context.item.scriptname.to_titlecase>]> == 1 {
+      - yaml id:<player.uuid> set <player.flag[Class]>.Skills.<context.item.scriptname.to_titlecase>:0
       - inventory set origin:i@Unassigned_Skill slot:<player.inventory.find[<context.item>]>
       - inventory open d:in@<player.flag[Class]>_Skills_Menu
     }
     else {
-      - yaml id:<player.uuid> set <player.flag[Class]>.Skills.<context.item.scriptname>:0
+      - yaml id:<player.uuid> set <player.flag[Class]>.Skills.<context.item.scriptname.to_titlecase>:0
       - inject Skill_Limit_Check
-      - yaml id:<player.uuid> set <player.flag[Class]>.Skills.<context.item.scriptname>:1
+      - yaml id:<player.uuid> set <player.flag[Class]>.Skills.<context.item.scriptname.to_titlecase>:1
       - inventory set origin:<context.item> slot:<player.inventory.find[i@Unassigned_Skill]>
       - inventory open d:in@<player.flag[Class]>_Skills_Menu
     }
@@ -59,10 +59,10 @@ Skill_Limit_Check:
 
 Skill_Bar_Management:
   type: task
-  debug: false
+  debug: true
   speed: 0
   script:
-    - yaml id:<player.uuid> set <player.flag[Class]>.Skill_Bar.Skills:<player.inventory.slot[1].scriptname>|<player.inventory.slot[2].scriptname>|<player.inventory.slot[3].scriptname>|<player.inventory.slot[4].scriptname>|<player.inventory.slot[5].scriptname>|<player.inventory.slot[6].scriptname>
+    - yaml id:<player.uuid> set <player.flag[Class]>.Skill_Bar.Skills:i@<player.inventory.slot[1].scriptname.to_titlecase>|i@<player.inventory.slot[2].scriptname.to_titlecase>|i@<player.inventory.slot[3].scriptname.to_titlecase>|i@<player.inventory.slot[4].scriptname.to_titlecase>|i@<player.inventory.slot[5].scriptname.to_titlecase>|i@<player.inventory.slot[6].scriptname.to_titlecase>
 
 Filler_Icon:
   type: item

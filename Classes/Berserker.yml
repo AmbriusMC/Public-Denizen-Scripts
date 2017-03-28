@@ -1,5 +1,6 @@
 Berserker_Stat_Config:
   type: yaml data
+  Default_Mana: 0
   Class_Resource: Rage
   Default_Skill_List: li@i@Cleave|i@BattleCry|i@Overpower
   Health: 150
@@ -13,7 +14,8 @@ Berserker_Skill_Config:
   Cleave_Range: 6
   Cleave_Cost: 2
   ## Battle Cry ##
-  BattleCry_Cooldown: 12
+  BattleCry_Cooldown: 15
+  BattleCry_Duration: 6
   BattleCry_Buff: 
   BattleCry_Cost: 4
   ## Overpower ##
@@ -21,7 +23,7 @@ Berserker_Skill_Config:
   Overpower_Cooldown: 3
   Overpower_Damage: 25
   Overpower_Stun_Duration: 2
-  Overpower_Cost: 3
+  Overpower_Cost: 5
   Overpower_Message: "<&a><&l>[Skill] <&f><player.name> <&7>has used <&f><def[Skill].to_titlecase> <&7>on <&f><def[target].name><&7>!"
   ## Leap ##
   Leap_Damage: 15
@@ -41,7 +43,7 @@ Berserker_Skill_Config:
   Hamstring_Power: 1
   Hamstring_Damage: 10
   Hamstring_Debuff: 0.2
-  Hamstring_Cost: 0
+  Hamstring_Cost: 2
 
 
 Berserker_World_Handler:
@@ -70,7 +72,7 @@ Berserker_Skills_Menu:
   title: <&6><&l>Berserker Skills<&co>
   size: 36
   slots:
-  - "[i@<player.inventory.slot[1].scriptname>[quantity=1]] [i@<player.inventory.slot[2].scriptname>[quantity=1]] [i@<player.inventory.slot[3].scriptname>[quantity=1]] [i@<player.inventory.slot[4].scriptname>[quantity=1]] [i@<player.inventory.slot[5].scriptname>[quantity=1]] [i@<player.inventory.slot[6].scriptname>[quantity=1]] [] [] [i@Exit_Icon]"
+  - "[i@<player.inventory.slot[1]>[quantity=1]] [i@<player.inventory.slot[2]>[quantity=1]] [i@<player.inventory.slot[3]>[quantity=1]] [i@<player.inventory.slot[4]>[quantity=1]] [i@<player.inventory.slot[5]>[quantity=1]] [i@<player.inventory.slot[6]>[quantity=1]] [] [] [i@Exit_Icon]"
   - "[i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon]"
   - "[i@Cleave] [i@BattleCry] [i@Overpower] [i@red_dye] [] [] [] [] []"
   - "[i@Leap] [i@AxeThrow] [i@Hamstring] [] [] [] [] [] []"
@@ -113,14 +115,14 @@ Hamstring:
 
 Hamstring_Cast:
   type: task
-  debug: true
+  debug: false
   speed: 0
   script:
     - flag player Hamstring_Effect duration:5s
 
 Hamstring_Effect:
   type: world
-  debug: true
+  debug: false
   events:
     on player damages entity:
     - if <context.damager.flag[Class]> == Berserker && <context.damager.has_flag[Hamstring_Effect]> {
@@ -290,8 +292,7 @@ BattleCry_Cast:
   script:
     - playeffect <player.location.add[0,1,0]> effect:NOTE visibility:25 quantity:5 offset:0.4
     - playsound <player.location> sound:ENTITY_POLAR_BEAR_WARNING volume:1.5 pitch:0.7
-    - flag player Enraged duration:6
-    - flag player BattleCry_Cooldown duration:12
+    - flag player Enraged duration:<s@Berserker_Skill_Config.yaml_key[BattleCry_Duration].as_int||6>
 
 Cleave:
   type: item
