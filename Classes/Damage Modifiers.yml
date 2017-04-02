@@ -14,3 +14,11 @@ Damage_Management:
   events:
     on player damaged by FALL:
     - determine cancelled
+    on player damages entity:
+    - if <context.cause> == ENTITY_ATTACK {
+      - define Damage_Modifier <yaml[<player.uuid>].read[General.Damage_Modifier]||1>
+      - define Class_Stat_Config s@<player.flag[Class]>_Stat_Config
+      - define Damage <10.mul[<def[Damage_Modifier]>]>
+      - narrate "<def[Damage]>" targets:<context.damager>
+      - determine <def[Damage]>
+    }

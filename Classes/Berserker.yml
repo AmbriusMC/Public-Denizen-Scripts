@@ -14,9 +14,9 @@ Berserker_Skill_Config:
   Cleave_Range: 6
   Cleave_Cost: 2
   ## Battle Cry ##
-  BattleCry_Cooldown: 15
+  BattleCry_Cooldown: 16
   BattleCry_Duration: 6
-  BattleCry_Buff: 
+  BattleCry_Buff: 0.2
   BattleCry_Cost: 4
   ## Overpower ##
   Overpower_Range: 6
@@ -72,7 +72,7 @@ Berserker_Skills_Menu:
   title: <&6><&l>Berserker Skills<&co>
   size: 36
   slots:
-  - "[i@<player.inventory.slot[1]>[quantity=1]] [i@<player.inventory.slot[2]>[quantity=1]] [i@<player.inventory.slot[3]>[quantity=1]] [i@<player.inventory.slot[4]>[quantity=1]] [i@<player.inventory.slot[5]>[quantity=1]] [i@<player.inventory.slot[6]>[quantity=1]] [] [] [i@Exit_Icon]"
+  - "[i@<player.inventory.slot[1].scriptname||Unassigned_Skill>[quantity=1]] [i@<player.inventory.slot[2].scriptname||Unassigned_Skill>[quantity=1]] [i@<player.inventory.slot[3].scriptname||Unassigned_Skill>[quantity=1]] [i@<player.inventory.slot[4].scriptname||Unassigned_Skill>[quantity=1]] [i@<player.inventory.slot[5].scriptname||Unassigned_Skill>[quantity=1]] [i@<player.inventory.slot[6].scriptname||Unassigned_Skill>[quantity=1]] [] [] [i@Exit_Icon]"
   - "[i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon]"
   - "[i@Cleave] [i@BattleCry] [i@Overpower] [i@red_dye] [] [] [] [] []"
   - "[i@Leap] [i@AxeThrow] [i@Hamstring] [] [] [] [] [] []"
@@ -287,12 +287,13 @@ BattleCry:
 
 BattleCry_Cast:
   type: task
-  debug: false
+  debug: true
   speed: 0
   script:
     - playeffect <player.location.add[0,1,0]> effect:NOTE visibility:25 quantity:5 offset:0.4
     - playsound <player.location> sound:ENTITY_POLAR_BEAR_WARNING volume:1.5 pitch:0.7
     - flag player Enraged duration:<s@Berserker_Skill_Config.yaml_key[BattleCry_Duration].as_int||6>
+    - run Damage_Boost_Effect def:<s@Berserker_Skill_Config.yaml_key[BattleCry_Duration].as_int||6>|<s@Berserker_Skill_Config.yaml_key[BattleCry_Buff].as_decimal||0.2>
 
 Cleave:
   type: item
