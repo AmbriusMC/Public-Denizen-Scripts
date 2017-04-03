@@ -4,32 +4,24 @@ Particle_Projectile:
   events:
     on check command:
     - determine passively fulfilled
-    - shoot e@item_projectile[item=i@1] origin:<player.location.add[0,1.3,0]> speed:3 shooter:<player> script:Particle_Projectile_Effect no_rotate save:Base_entity
-    - define Projectile <entry[Base_entity].shot_entities.get[1]>
-    - adjust <server.list_online_players> hide_entity:<def[Projectile]>
-    - repeat 10 {
-      - playeffect <def[Projectile].location> effect:SMOKE_NORMAL visibility:30 quantity:30 offset:0.2
-      - wait 0.2t
+    - define location <player.location.add[0,0.5,0]> 
+    - define vector <def[location].direction.vector.mul[1.5]> 
+    - repeat 100 { 
+      - define location <def[location].add[<def[vector]>]>
+      - if <def[location].add[0,0.5,0].material.is_solid> {
+        - queue clear
+      }
+      - if !<def[location].find.living_entities.within[0.75].exclude[<player>].is_empty> {
+        - define Target <def[location].find.living_entities.within[0.5].exclude[<player>].get[1]||null>
+        - if <def[Target]> == null {
+          - queue clear
+        }
+        - hurt 10 <def[Target]> cause:custom
+        - queue clear
+      } 
+      - playeffect <def[location]> effect:SMOKE_NORMAL visibility:30 quantity:30 offset:0.3
+      - wait 1t 
     }
-
-Particle_Projectile_Effect:
-  type: task
-  debug: true
-  speed: 0
-  script:
-    - remove <def[last_entity]>
-    - if <def[hit_entities].is_empty> {
-      - queue clear
-    }
-    - define Target <def[hit_entities].get[1]||null>
-    - if <def[hit_entities].get[1]> == <player> {
-      - define Target <player.target.within[4]||null>
-    }
-    - if <def[Target]> == null {
-      - queue clear
-    }
-    - hurt 10 <def[Target]> cause:custom
-
 
 Combat_Effect:
   type: world
@@ -47,9 +39,11 @@ Damage_Boost_Effect:
   debug: false
   speed: 0
   script:
-    - yaml id:<player.uuid> set General.Damage_Modifier:+:<def[2]>
+    - define Damage_Modifier <yaml[<player.uuid>].read[General.Damage_Modifier]||1>
+    - yaml id:<player.uuid> set General.Damage_Modifier:<def[Damage_Modifier].add[<def[2]>]>
     - wait <def[1].as_duration>
-    - yaml id:<player.uuid> set General.Damage_Modifier:-:<def[2]>
+    - define Damage_Modifier <yaml[<player.uuid>].read[General.Damage_Modifier]||1>
+    - yaml id:<player.uuid> set General.Damage_Modifier:<def[Damage_Modifier].sub[<def[2]>]>
 
 ## <def[1]> is the duration ## <def[2]> is the target ##
 Stun_Effect:

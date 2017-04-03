@@ -7,11 +7,16 @@ Class_Commands:
   permission: class
   permission message: <&7>Sorry, <&6><player.name><&7>. You cannot use this command because you do not have the permission <&f>'<permission>'<&7>!
   script:
+  - if <player.gamemode.id> != 2 {
+    - narrate "<&a><&l>[Class] <&7>You must be in <&f>Adventure Mode <&7>to use this command!"
+    - queue clear
+  }
   - if <context.args.size> == 0 {
     - inventory open d:in@Class_Select_Menu
   }
   else if <context.args.size> == 1 {
-    - if <context.args.get[1]> == skills && <player.flag[Class]> != Citizen {
+    - if <context.args.get[1]> == skills && <player.flag[Class]||Citizen> != Citizen {
+      - inject Skill_Bar_Setup
       - inventory open d:in@<player.flag[Class]>_Skills_Menu
     }
     else if <player.flag[Class]> == Citizen || !<player.has_flag[Class]> {

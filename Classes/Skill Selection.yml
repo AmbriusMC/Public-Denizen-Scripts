@@ -1,6 +1,6 @@
 Selection_Process:
   type: task
-  debug: false
+  debug: true
   speed: 0
   script:
     - if <player.has_flag[<context.item.scriptname.to_titlecase>_Cooldown]> {
@@ -26,11 +26,13 @@ Selection_Process:
       - inject Skill_Limit_Check
       - yaml id:<player.uuid> set <player.flag[Class]>.Skills.<context.item.scriptname.to_titlecase>:1
       - inventory set origin:<context.item> slot:<player.inventory.find[i@Unassigned_Skill]>
+      - run Skill_Bar_Management
       - inventory open d:in@<player.flag[Class]>_Skills_Menu
     }
     else if <yaml[<player.uuid>].read[<player.flag[Class]>.Skills.<context.item.scriptname.to_titlecase>]> == 1 {
       - yaml id:<player.uuid> set <player.flag[Class]>.Skills.<context.item.scriptname.to_titlecase>:0
       - inventory set origin:i@Unassigned_Skill slot:<player.inventory.find[<context.item>]>
+      - run Skill_Bar_Management
       - inventory open d:in@<player.flag[Class]>_Skills_Menu
     }
     else {
@@ -38,6 +40,7 @@ Selection_Process:
       - inject Skill_Limit_Check
       - yaml id:<player.uuid> set <player.flag[Class]>.Skills.<context.item.scriptname.to_titlecase>:1
       - inventory set origin:<context.item> slot:<player.inventory.find[i@Unassigned_Skill]>
+      - run Skill_Bar_Management
       - inventory open d:in@<player.flag[Class]>_Skills_Menu
     }
 
@@ -46,13 +49,13 @@ Skill_Limit_Check:
   debug: false
   speed: 0
   script:
+    - define Check 0
     - foreach <yaml[<player.uuid>].list_keys[<player.flag[Class]>.Skills]> {
-      - define Check 0
       - if <yaml[<player.uuid>].read[<player.flag[Class]>.Skills.<def[value]>]> == 1 {
         - define Check <def[Check].add[1]>
       }
     }
-    - if <def[Check]> > 3 {
+    - if <def[Check]> == 3 {
       - narrate "<&a><&l>[Class] <&7>You already have <&f>3 <&7>optional skills selected!"
       - queue clear
     }
@@ -68,7 +71,7 @@ Filler_Icon:
   type: item
   debug: false
   material: stained_glass_pane
-  display name: <&6><&sp><&sp><&sp><&sp>Skill Bar
+  display name: <&6>Available Skills
   lore:
   - <&e><&sp>-----------
-  - <&a>Available Skills
+  - <&a><&sp><&sp><&sp><&sp>Skill Bar

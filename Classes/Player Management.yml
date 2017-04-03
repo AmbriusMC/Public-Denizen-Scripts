@@ -14,7 +14,7 @@ File_Manager:
     }
     on player quits:
     - wait 30s
-    - if <player.is_online> == false {
+    - if !<player.is_online> {
       - yaml "savefile:/Players/<player.uuid>.yml" id:<player.uuid>
       - yaml unload id:<player.uuid>
     }
@@ -65,7 +65,7 @@ Gamemode_Handler:
 
 Skill_Bar_Setup:
   type: task
-  debug: true
+  debug: false
   speed: 0
   script:
     - foreach '<player.inventory.list_contents.with_lore[Default Skill]>' {

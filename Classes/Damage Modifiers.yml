@@ -16,9 +16,8 @@ Damage_Management:
     - determine cancelled
     on player damages entity:
     - if <context.cause> == ENTITY_ATTACK {
+      - define Class_Stat_Config s@<context.damager.flag[Class]>_Stat_Config
       - define Damage_Modifier <yaml[<player.uuid>].read[General.Damage_Modifier]||1>
-      - define Class_Stat_Config s@<player.flag[Class]>_Stat_Config
-      - define Damage <10.mul[<def[Damage_Modifier]>]>
-      - narrate "<def[Damage]>" targets:<context.damager>
+      - define Damage <def[Class_Stat_Config].yaml_key[Melee_Damage].mul[<def[Damage_Modifier]>]||1>
       - determine <def[Damage]>
     }
