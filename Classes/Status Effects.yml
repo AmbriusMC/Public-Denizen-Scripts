@@ -33,6 +33,19 @@ Combat_Effect:
       - flag <context.entity> In_Combat duration:20s
     }
 
+## Heals Procentage ## <def[1]> is heal procentage in decimal ## <def[2]> is the amount of times to repeat ## <def[3]> is the interval in seconds ##
+HoT_Effect:
+  type: task
+  debug: false
+  speed: 0
+  script:
+    - repeat <def[2]||4> {
+      - heal <def[1]||0.05> <player>
+      - wait <def[3]>s
+    }
+
+
+
 ## <def[1]> is the duration ## <def[2]> is the value ##
 Damage_Boost_Effect:
   type: task

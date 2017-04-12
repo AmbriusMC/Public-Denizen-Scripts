@@ -43,11 +43,11 @@ Cast_Sequence:
   speed: 0
   script:
     - if <player.has_flag[Silence_Effect]> {
-      - narrate "<&a><&l>[Skill] <&7>You are currently silenced for another <&f><player.flag[Silence_Effect].expiration.in_seconds.round_to[1]>s<&7>!"
+      - narrate "<&a><&l>[Skill] <&7>You are currently <&f>Silenced <&7>for another <&f><player.flag[Silence_Effect].expiration.in_seconds.round_to[1]>s<&7>!"
       - queue clear
     }
     - if <player.has_flag[Stun_Effect]> {
-      - narrate "<&a><&l>[Skill] <&7>You are currently Stunned for another <&f><player.flag[Stun_Effect].expiration.in_seconds.round_to[1]>s<&7>!"
+      - narrate "<&a><&l>[Skill] <&7>You are currently <&f>Stunned <&7>for another <&f><player.flag[Stun_Effect].expiration.in_seconds.round_to[1]>s<&7>!"
       - queue clear
     }
     - define Class_Skill_Config s@<player.flag[Class]>_Skill_Config
@@ -55,7 +55,7 @@ Cast_Sequence:
     - define Skill_Cooldown <def[Skill]>_Cooldown
     - define Skill_Cost <def[Class_Skill_Config].yaml_key[<def[Skill]>_Cost].as_int||0>
     - if <player.has_flag[<def[Skill_Cooldown]>]> {
-      - narrate "<&a><&l>[Skill] <&f><def[Skill]> <&7>has <&f><player.flag[<def[Skill_Cooldown]>].expiration.in_seconds.round_to[1]>s <&7>until it's ready!"
+      - narrate "<&a><&l>[Skill] <&f><def[Skill].replace[_].with[<&sp>].to_titlecase> <&7>has <&f><player.flag[<def[Skill_Cooldown]>].expiration.in_seconds.round_to[1]>s <&7>until it's ready!"
       - queue clear
     }
     - if <def[Skill_Cost]> > <yaml[<player.uuid>].read[General.Mana].as_int> {

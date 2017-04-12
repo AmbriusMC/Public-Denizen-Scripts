@@ -13,6 +13,7 @@ File_Manager:
       - yaml id:<player.uuid> set General.Name:<player.name>
     }
     on player quits:
+    - yaml "savefile:/Players/<player.uuid>.yml" id:<player.uuid>
     - wait 30s
     - if !<player.is_online> {
       - yaml "savefile:/Players/<player.uuid>.yml" id:<player.uuid>
@@ -37,10 +38,18 @@ Class_Login_Handler:
     - define Class_Stat_Config s@<player.flag[Class]>_Stat_Config
     - yaml id:<player.uuid> set General.Mana:<def[Class_Stat_Config].yaml_key[Default_Mana]||0>
     - inject Skill_Bar_Setup
+    - run Skill_Bar_Management
     - while <player.is_online> {
       - define Mana <yaml[<player.uuid>].read[General.Mana]>
       - adjust <player> fake_experience:<def[Mana].div[20]>|<def[Mana]>
       - if <player.flag[Class]||Citizen> == Berserker {
+        - if <player.has_flag[Enraged]> {
+          - define Enrage Active
+        }
+        else {
+          - define Enrage Inactive
+        }
+        - sidebar set title:<&6><&l>Info<&co> "value:<&2><&l>Health<&co> <&f><player.health.as_int>|<&2><&l>Rage<&co> <&f><yaml[<player.uuid>].read[General.Mana].as_int||0>|<&2><&l>Enrage<&co> <&f><def[Enrage]>" "players:<player>" "increment:-1"
         - if !<player.has_flag[In_Combat]> {
           - if <def[Mana]> >= 1 {
             - yaml id:<player.uuid> set General.Mana:<def[Mana].sub[1]>
@@ -53,7 +62,7 @@ Class_Login_Handler:
           }
         }
       }
-      - wait 1s
+      - wait 10t
     }
 
 Gamemode_Handler:
@@ -79,6 +88,9 @@ Skill_Bar_Setup:
     }
     - wait 1t
     - if <player.gamemode.id> == 2 {
+      - if <player.flag[Class]> == Citizen {
+          - queue clear
+      }
       - if <yaml[<player.uuid>].contains[<player.flag[Class]>.Skill_Bar.Skills]> {
         - define Slot 1
         - foreach <yaml[<player.uuid>].read[<player.flag[Class]>.Skill_Bar.Skills]> {

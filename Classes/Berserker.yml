@@ -10,9 +10,9 @@ Berserker_Skill_Config:
   type: yaml data
   ## Cleave ##
   Cleave_Cooldown: 3
-  Cleave_Damage: 10
+  Cleave_Damage: 15
   Cleave_Range: 6
-  Cleave_Cost: 2
+  Cleave_Cost: 3
   ## Battle Cry ##
   Battle_Cry_Cooldown: 16
   Battle_Cry_Duration: 6
@@ -21,7 +21,7 @@ Berserker_Skill_Config:
   ## Overpower ##
   Overpower_Range: 6
   Overpower_Cooldown: 3
-  Overpower_Damage: 25
+  Overpower_Damage: 35
   Overpower_Stun_Duration: 2
   Overpower_Cost: 5
   Overpower_Message: "<&a><&l>[Skill] <&f><player.name> <&7>has used <&f><def[Skill].to_titlecase.replace[_].with[<&sp>]> <&7>on <&f><def[target].name><&7>!"
@@ -45,16 +45,18 @@ Berserker_Skill_Config:
   Hamstring_Debuff: 0.2
   Hamstring_Cost: 2
   ## Enraged_Regeneration ##
-  Enraged_Regeneration_Cost: 0
-
-
+  Enraged_Regeneration_Cooldown: 30
+  Enraged_Regeneration_Heal_Procentage: 0.05
+  Enraged_Regeneration_Repeat: 5
+  Enraged_Regeneration_Interval: 3
+  Enraged_Regeneration_Cost: 4
 
 Berserker_World_Handler:
   type: world
   debug: false
   events:
     on player damages entity:
-    - if <player.flag[Class]> == Berserker {
+    - if <player.flag[Class]> == Berserker && !<player.has_flag[Stun_Effect]> {
       - if <context.cause> == entity_attack {
         - define Mana <yaml[<player.uuid>].read[General.Mana].as_int>
         - if <def[Mana].add[2]> >= 20 {
@@ -66,6 +68,9 @@ Berserker_World_Handler:
           - define Mana <def[Mana].add[2]>
           - adjust <player> fake_experience:<def[Mana].div[20]>|<def[Mana]>
         }
+        - if <util.random.int[1].to[100].is[OR_MORE].than[90]> && !<player.has_flag[Enraged]> {
+          - flag <player> Enraged duration:3s
+        }
       }
     }
 
@@ -75,7 +80,7 @@ Berserker_Skills_Menu:
   title: <&6><&l>Berserker Skills<&co>
   size: 36
   slots:
-  - "[i@Cleave] [i@Battle_Cry] [i@Overpower] [i@red_dye] [] [] [] [] []"
+  - "[i@Cleave] [i@Battle_Cry] [i@Overpower] [i@Inner_Rage] [] [] [] [] []"
   - "[i@Leap] [i@Axe_Throw] [i@Hamstring] [i@Enraged_Regeneration] [] [] [] [] []"
   - "[i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon]"
   - "[i@<player.inventory.slot[1].scriptname||Unassigned_Skill>[quantity=1]] [i@<player.inventory.slot[2].scriptname||Unassigned_Skill>[quantity=1]] [i@<player.inventory.slot[3].scriptname||Unassigned_Skill>[quantity=1]] [i@<player.inventory.slot[4].scriptname||Unassigned_Skill>[quantity=1]] [i@<player.inventory.slot[5].scriptname||Unassigned_Skill>[quantity=1]] [i@<player.inventory.slot[6].scriptname||Unassigned_Skill>[quantity=1]] [] [] [i@Exit_Icon]"
@@ -83,7 +88,7 @@ Berserker_Skills_Menu:
 
 Berserker_Skills_Menu_Handler:
   type: world
-  debug: true
+  debug: false
   events:
     on player clicks in Berserker_Skills_Menu:
     - determine cancelled
@@ -105,7 +110,6 @@ Berserker_Skills_Menu_Handler:
     - inject Selection_Process
     on player clicks Exit_Icon in Berserker_Skills_Menu:
     - inventory close
-    - inject Skill_Bar_Management
     on player closes Berserker_Skills_Menu:
     - inject Skill_Bar_Management
 
@@ -151,6 +155,17 @@ Enraged_Regeneration:
   - <&sp>
   - <&6>Only usable while &e&oEnraged!
 
+Enraged_Regeneration_Cast:
+  type: task
+  debug: false
+  speed: 0
+  script:
+    - if !<player.has_flag[Enraged]> {
+      - narrate "<&a><&l>[Skill] <&7>You are not <&f>Enraged<&7>!"
+      - queue clear
+    }
+    - run HoT_Effect def:<player.health.max.mul[<s@Berserker_Skill_Config.yaml_key[Enraged_Regeneration_Heal_Procentage].as_decimal||0.05>]>|<s@Berserker_Skill_Config.yaml_key[Enraged_Regeneration_Repeat].as_int||5>|<s@Berserker_Skill_Config.yaml_key[Enraged_Regeneration_Interval].as_int||2> player:<player>
+
 Axe_Throw:
   type: item
   debug: false
@@ -187,6 +202,9 @@ Axe_Throw_Effect:
       - queue clear
     }
     - repeat <s@Berserker_Skill_Config.yaml_key[Axe_Throw_Ticks].as_int||5> {
+      - if <def[Target].health||null> == null {
+        - queue clear
+      }
       - hurt <s@Berserker_Skill_Config.yaml_key[Axe_Throw_Damage].as_int||5> <def[Target]> cause:custom
       - playeffect <def[Target].location> effect:iconcrack_331 quantity:10 offset:0.3
       - wait <s@Berserker_Skill_Config.yaml_key[Axe_Throw_Period].as_duration||2s>
@@ -205,15 +223,17 @@ Leap:
   - <&6>where you land, dealing damage to them and
   - <&6>generating rage.
 
+## <player.location.add[<player.location.direction.vector.add[0,0.5,0].mul[1.5]>]> ##
 Leap_Cast:
   type: task
   debug: false
   speed: 0
   script:
     - if <player.location.below.material> != m@air || <player.location.material> != m@air {
-      - push <player> origin:<player.location> destination:<player.location.cursor_on[5].add[0,3,0]> speed:1.5 duration:1t script:Leap_Effect no_damage no_rotate
+      - push <player> origin:<player.location> destination:<player.location.add[<l@0,0,0.with_pose[-20,<player.location.yaw>].direction.vector.mul[3]>]> speed:1.75 duration:1t script:Leap_Effect no_damage no_rotate
     }
     else {
+      - narrate "<&a><&l>[Skill] <&7>You cannot you this ability while you are midair!"
       - queue clear
     }
 
@@ -337,3 +357,18 @@ Cleave_Cast:
         - hurt <s@Berserker_Skill_Config.yaml_key[Cleave_Damage].as_int||5> <def[Value]> cause:custom
       }
     }
+
+Inner_Rage:
+  type: item
+  debug: false
+  material: red_dye
+  display name: <&c><&l>Inner Rage
+  lore:
+  - <&e>Default Skill
+  - <&sp>
+  - <&2>Type<&co> <&a>[Passive] <&6>Resource Generation
+  - <&2>Description<&co> <&6>Each melee attack will grant you
+  - <&6>rage, which you can spent on abilities.
+  - <&sp>
+  - <&6>Additionally your attacks have chance to make you
+  - <&e><&o>Enraged <&6>for a short duration.

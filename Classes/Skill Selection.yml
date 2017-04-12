@@ -1,6 +1,6 @@
 Selection_Process:
   type: task
-  debug: true
+  debug: false
   speed: 0
   script:
     - if <player.has_flag[<context.item.scriptname.to_titlecase>_Cooldown]> {
@@ -8,61 +8,38 @@ Selection_Process:
       - queue clear
     }
     - define Class_Stat_Config s@<player.flag[Class]>_Stat_Config
-    - foreach <def[Class_Stat_Config].yaml_key[Default_Skill_List]> {
-      - if <context.item> == <def[value]> {
-        - if <player.inventory.find[<context.item>]> == -1 {
-          - inventory set origin:<context.item> slot:<player.inventory.find[i@Unassigned_Skill]>
-          - inventory open d:in@<player.flag[Class]>_Skills_Menu
-          - queue clear
-        }
-        else {
+    - if <yaml[<player.uuid>].contains[<player.flag[Class]>.Skill_Bar.Skills]> {
+      - if <context.item.lore.get[1]> contains Optional Skill {
+        - define Limit_Check 1
+      }
+      else {
+        - define Limit_Check 0
+      }
+      - foreach <yaml[<player.uuid>].read[<player.flag[Class]>.Skill_Bar.Skills]> {
+        - if <context.item.scriptname> == <def[Value].scriptname> {
           - inventory set origin:i@Unassigned_Skill slot:<player.inventory.find[<context.item>]>
+          - run Skill_Bar_Management
           - inventory open d:in@<player.flag[Class]>_Skills_Menu
           - queue clear
         }
+        else if <def[Value].lore.get[1]> contains Optional Skill {
+          - define Limit_Check <def[Limit_Check].add[1]>
+        }
       }
-    }
-    - if <yaml[<player.uuid>].read[<player.flag[Class]>.Skills.<context.item.scriptname.to_titlecase>]> == 0 {
-      - inject Skill_Limit_Check
-      - yaml id:<player.uuid> set <player.flag[Class]>.Skills.<context.item.scriptname.to_titlecase>:1
-      - inventory set origin:<context.item> slot:<player.inventory.find[i@Unassigned_Skill]>
-      - run Skill_Bar_Management
-      - inventory open d:in@<player.flag[Class]>_Skills_Menu
-    }
-    else if <yaml[<player.uuid>].read[<player.flag[Class]>.Skills.<context.item.scriptname.to_titlecase>]> == 1 {
-      - yaml id:<player.uuid> set <player.flag[Class]>.Skills.<context.item.scriptname.to_titlecase>:0
-      - inventory set origin:i@Unassigned_Skill slot:<player.inventory.find[<context.item>]>
-      - run Skill_Bar_Management
-      - inventory open d:in@<player.flag[Class]>_Skills_Menu
-    }
-    else {
-      - yaml id:<player.uuid> set <player.flag[Class]>.Skills.<context.item.scriptname.to_titlecase>:0
-      - inject Skill_Limit_Check
-      - yaml id:<player.uuid> set <player.flag[Class]>.Skills.<context.item.scriptname.to_titlecase>:1
-      - inventory set origin:<context.item> slot:<player.inventory.find[i@Unassigned_Skill]>
-      - run Skill_Bar_Management
-      - inventory open d:in@<player.flag[Class]>_Skills_Menu
-    }
-
-Skill_Limit_Check:
-  type: task
-  debug: false
-  speed: 0
-  script:
-    - define Check 0
-    - foreach <yaml[<player.uuid>].list_keys[<player.flag[Class]>.Skills]> {
-      - if <yaml[<player.uuid>].read[<player.flag[Class]>.Skills.<def[value]>]> == 1 {
-        - define Check <def[Check].add[1]>
+      - if <def[Limit_Check]> > 3 {
+        - narrate "<&a><&l>[Class] <&7>You already have <&f>3 <&7>optional skills selected!"
+        - queue clear
       }
-    }
-    - if <def[Check]> == 3 {
-      - narrate "<&a><&l>[Class] <&7>You already have <&f>3 <&7>optional skills selected!"
-      - queue clear
+      else {
+        - inventory set origin:<context.item> slot:<player.inventory.find[i@Unassigned_Skill]>
+        - run Skill_Bar_Management
+        - inventory open d:in@<player.flag[Class]>_Skills_Menu
+      }
     }
 
 Skill_Bar_Management:
   type: task
-  debug: true
+  debug: false
   speed: 0
   script:
     - yaml id:<player.uuid> set <player.flag[Class]>.Skill_Bar.Skills:i@<player.inventory.slot[1].scriptname.to_titlecase>|i@<player.inventory.slot[2].scriptname.to_titlecase>|i@<player.inventory.slot[3].scriptname.to_titlecase>|i@<player.inventory.slot[4].scriptname.to_titlecase>|i@<player.inventory.slot[5].scriptname.to_titlecase>|i@<player.inventory.slot[6].scriptname.to_titlecase>
