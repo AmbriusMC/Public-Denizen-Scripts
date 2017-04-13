@@ -13,17 +13,60 @@ Class_Commands:
   }
   - if <context.args.size> == 0 {
     - inventory open d:in@Class_Select_Menu
+    - queue clear
   }
   else if <context.args.size> == 1 {
     - if <context.args.get[1]> == skills && <player.flag[Class]||Citizen> != Citizen {
       - inject Skill_Bar_Setup
       - inventory open d:in@<player.flag[Class]>_Skills_Menu
+      - queue clear
     }
     else if <player.flag[Class]> == Citizen || !<player.has_flag[Class]> {
       - narrate "<&a><&l>[Class] <&7>You currently do not have any class set!"
+      - queue clear
     }
     else {
      - narrate "<&a><&l>[Class] <&7>Invalid command."
+     - queue clear
+    }
+  }
+  else if <context.args.size> == 2 && <context.args.get[1]> == admin {
+    - if !<player.is_op> {
+      - narrate "<&a><&l>[Class] <&7>You must be an administrator to use this command!"
+      - queue clear
+    }
+    - if <context.args.get[2]> == cooldown && <yaml[<player.uuid>].contains[<player.flag[Class]>.Skill_Bar.Skills]> {
+      - foreach <yaml[<player.uuid>].read[<player.flag[Class]>.Skill_Bar.Skills]> {
+        - define Skill <def[value].scriptname>_Cooldown
+        - if <player.has_flag[<def[Skill]>]> {
+          - flag player <def[Skill]>:!
+        }
+      }
+      - run Skill_Bar_Setup
+      - narrate "<&a><&l>[Class] <&7>Your cooldowns have been reset!"
+      - queue clear
+    }
+  }
+  else if <context.args.size> == 3 && <context.args.get[1]> == admin {
+    - if !<player.is_op> {
+      - narrate "<&a><&l>[Class] <&7>You must be an administrator to use this command!"
+      - queue clear
+    }
+    - if <context.args.get[2]> == cooldown && <yaml[<player.uuid>].contains[<player.flag[Class]>.Skill_Bar.Skills]> {
+      - define Player p@<context.args.get[3]>
+      - if !<def[Player].is_online> {
+        - narrate "<&a><&l>[Class] <&f><def[Player].name> is not online!"
+        - queue clear
+      }
+      - foreach <yaml[<def[Player].uuid>].read[<def[Player].flag[Class]>.Skill_Bar.Skills]> {
+        - define Skill <def[value].scriptname>_Cooldown
+        - if <def[Player].has_flag[<def[Skill]>]> {
+          - flag p@<def[Player]> <def[Skill]>:!
+        }
+      }
+      - run Skill_Bar_Setup player:<def[Player]>
+      - narrate "<&a><&l>[Class] <&7>Your cooldowns have been reset!"
+      - queue clear
     }
   }
 

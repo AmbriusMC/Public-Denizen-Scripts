@@ -38,7 +38,6 @@ Class_Login_Handler:
     - define Class_Stat_Config s@<player.flag[Class]>_Stat_Config
     - yaml id:<player.uuid> set General.Mana:<def[Class_Stat_Config].yaml_key[Default_Mana]||0>
     - inject Skill_Bar_Setup
-    - run Skill_Bar_Management
     - while <player.is_online> {
       - define Mana <yaml[<player.uuid>].read[General.Mana]>
       - adjust <player> fake_experience:<def[Mana].div[20]>|<def[Mana]>

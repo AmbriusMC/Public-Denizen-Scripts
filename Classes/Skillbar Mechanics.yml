@@ -67,22 +67,24 @@ Cast_Sequence:
     - yaml id:<player.uuid> set General.Mana:<def[Mana].sub[<def[Skill_Cost]>]>
     - define Mana <def[Mana].sub[<def[Skill_Cost]>]>
     - adjust <player> fake_experience:<def[Mana].div[20]>|<def[Mana]>
-    - flag player <def[Skill_Cooldown]> duration:<def[Class_Skill_Config].yaml_key[<def[Skill_Cooldown]>].as_int||10>
     - define Message "<def[Class_Skill_Config].yaml_key[<def[Skill]>_Message]||<&a><&l>[Skill] <&f><player.name> <&7>has used <&f><def[Skill].replace[_].with[<&sp>].to_titlecase><&7>!>"
     - narrate "<parse:<def[Message]>>" targets:<player.location.find.players.within[25]>
-    - repeat <def[Class_Skill_Config].yaml_key[<def[Skill_Cooldown]>].as_int.mul[1.5]||15> {
-      - if !<player.is_online> {
-        - goto Offline_Skip
-      }
-      - if !<player.has_flag[<def[Skill_Cooldown]>]> {
-        - adjust <player.inventory.slot[<def[Skill_Slot]>]> quantity:1 save:Cooldown
+    - if <def[Multi_Cast]||false> == false {
+      - flag player <def[Skill_Cooldown]> duration:<def[Class_Skill_Config].yaml_key[<def[Skill_Cooldown]>].as_int||10>
+      - repeat <def[Class_Skill_Config].yaml_key[<def[Skill_Cooldown]>].as_int.mul[1.5]||15> {
+        - if !<player.is_online> {
+          - goto Offline_Skip
+        }
+        - if !<player.has_flag[<def[Skill_Cooldown]>]> {
+          - adjust <player.inventory.slot[<def[Skill_Slot]>]> quantity:1 save:Cooldown
+          - inventory set origin:<entry[Cooldown].result> slot:<def[Skill_Slot]>
+          - queue clear
+        }
+        - adjust <player.inventory.slot[<def[Skill_Slot]>]> quantity:<player.flag[<def[Skill_Cooldown]>].expiration.in_seconds.round> save:Cooldown
         - inventory set origin:<entry[Cooldown].result> slot:<def[Skill_Slot]>
-        - queue clear
+        - mark Offline_Skip
+        - wait 0.75s
       }
-      - adjust <player.inventory.slot[<def[Skill_Slot]>]> quantity:<player.flag[<def[Skill_Cooldown]>].expiration.in_seconds.round> save:Cooldown
-      - inventory set origin:<entry[Cooldown].result> slot:<def[Skill_Slot]>
-      - mark Offline_Skip
-      - wait 0.75s
     }
 
 Unassigned_Skill:
