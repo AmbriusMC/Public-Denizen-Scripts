@@ -17,7 +17,7 @@ Selection_Process:
       }
       - foreach <yaml[<player.uuid>].read[<player.flag[Class]>.Skill_Bar.Skills]> {
         - if <context.item.scriptname> == <def[Value].scriptname> {
-          - inventory set origin:i@Unassigned_Skill slot:<player.inventory.find[<context.item>]>
+          - inventory set origin:i@Unassigned_Skill slot:<player.inventory.find[<context.item.scriptname>]>
           - run Skill_Bar_Management
           - inventory open d:in@<player.flag[Class]>_Skills_Menu
           - queue clear

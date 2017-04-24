@@ -1,15 +1,20 @@
 Berserker_Stat_Config:
   type: yaml data
   Default_Mana: 0
+  Max_Mana: 20
+  Min_Mana: 0
   Class_Resource: Rage
   Default_Skill_List: li@i@Cleave|i@Battle_Cry|i@Overpower
-  Health: 150
-  Melee_Damage: 8
+  Health: 300
+  Melee_Damage: 16
 
 Berserker_Skill_Config:
   type: yaml data
+  ## Inner Rage ##
+  Inner_Rage_Resource: 2
+  Inner_Rage_Chance: 10
   ## Cleave ##
-  Cleave_Cooldown: 3
+  Cleave_Cooldown: 2
   Cleave_Damage: 15
   Cleave_Range: 6
   Cleave_Cost: 3
@@ -21,8 +26,8 @@ Berserker_Skill_Config:
   ## Overpower ##
   Overpower_Range: 6
   Overpower_Cooldown: 3
-  Overpower_Damage: 35
-  Overpower_Stun_Duration: 2
+  Overpower_Damage: 30
+  Overpower_Stun_Duration: 1.5
   Overpower_Cost: 5
   Overpower_Message: "<&a><&l>[Skill] <&f><player.name> <&7>has used <&f><def[Skill].to_titlecase.replace[_].with[<&sp>]> <&7>on <&f><def[target].name><&7>!"
   ## Charge ##
@@ -35,27 +40,35 @@ Berserker_Skill_Config:
   Axe_Throw_Cooldown: 10
   Axe_Throw_Ticks: 5
   Axe_Throw_Period: 3
-  Axe_Throw_Damage: 5
+  Axe_Throw_Damage: 8
   Axe_Throw_Cost: 3
   ## Hamstring ##
   Hamstring_Cooldown: 8
   Hamstring_Duration: 5
-  Hamstring_Power: 1
+  Hamstring_Power: 2
   Hamstring_Damage: 10
-  Hamstring_Debuff: 0.2
+  Hamstring_Debuff: 0.25
   Hamstring_Cost: 2
   ## Enraged_Regeneration ##
-  Enraged_Regeneration_Cooldown: 30
+  Enraged_Regeneration_Cooldown: 20
   Enraged_Regeneration_Heal_Procentage: 0.05
-  Enraged_Regeneration_Repeat: 5
-  Enraged_Regeneration_Interval: 3
+  Enraged_Regeneration_Ticks: 5
+  Enraged_Regeneration_Period: 3
   Enraged_Regeneration_Cost: 4
   ## Whirlwind ##
-  Whirlwind_Cooldown: 8
+  Whirlwind_Cooldown: 10
   Whirlwind_Damage: 10
   Whirlwind_Increase: 5
-  Whirlwind_Range: 5
-  Whirlwind_Cost: 3
+  Whirlwind_Range: 7
+  Whirlwind_Reactivation: 4
+  Whirlwind_Cost: 2
+  ## Smash ##
+  Smash_Cooldown: 12
+  Smash_Damage: 45
+  Smash_Range: 2
+  Smash_Repetition: 5
+  Smash_Cost: 6
+
 
 Berserker_World_Handler:
   type: world
@@ -65,16 +78,16 @@ Berserker_World_Handler:
     - if <player.flag[Class]> == Berserker && !<player.has_flag[Stun_Effect]> {
       - if <context.cause> == entity_attack {
         - define Mana <yaml[<player.uuid>].read[General.Mana].as_int>
-        - if <def[Mana].add[2]> >= 20 {
-          - yaml id:<player.uuid> set General.Mana:20
-          - adjust <player> fake_experience:1.0|20
+        - if <def[Mana].add[<s@Berserker_Skill_Config.yaml_key[Inner_Rage_Resource].as_int||2>]> >= <s@Berserker_Skill_Config.yaml_key[Max_Mana].as_int||20> {
+          - yaml id:<player.uuid> set General.Mana:<s@Berserker_Skill_Config.yaml_key[Max_Mana].as_int||20>
+          - adjust <player> fake_experience:1.0|<s@Berserker_Skill_Config.yaml_key[Max_Mana].as_int||20>
         }
-        else if <def[Mana]> < 18 {
-          - yaml id:<player.uuid> set General.Mana:<def[Mana].add[2]>
-          - define Mana <def[Mana].add[2]>
-          - adjust <player> fake_experience:<def[Mana].div[20]>|<def[Mana]>
+        else {
+          - yaml id:<player.uuid> set General.Mana:<def[Mana].add[<s@Berserker_Skill_Config.yaml_key[Inner_Rage_Resource].as_int||2>]>
+          - define Mana <def[Mana].add[<s@Berserker_Skill_Config.yaml_key[Inner_Rage_Resource].as_int||2>]>
+          - adjust <player> fake_experience:<def[Mana].div[<s@Berserker_Skill_Config.yaml_key[Max_Mana].as_int||20>]>|<def[Mana]>
         }
-        - if <util.random.int[1].to[100].is[OR_MORE].than[92]> {
+        - if <util.random.int[1].to[100]> >= <el@100.sub[<s@Berserker_Skill_Config.yaml_key[Inner_Rage_Chance]||10>]> {
           - if <player.has_flag[Enraged]> {
             - flag <player> Enraged duration:<player.flag[Enraged].expiration.add[2]>
           }
@@ -92,7 +105,7 @@ Berserker_Skills_Menu:
   size: 36
   slots:
   - "[i@Cleave] [i@Battle_Cry] [i@Overpower] [i@Inner_Rage] [] [] [] [] []"
-  - "[i@Charge] [i@Axe_Throw] [i@Hamstring] [i@Enraged_Regeneration] [i@Whirlwind] [] [] [] []"
+  - "[i@Charge] [i@Axe_Throw] [i@Hamstring] [i@Enraged_Regeneration] [i@Whirlwind] [i@Smash] [] [] []"
   - "[i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon]"
   - "[i@<player.inventory.slot[1].scriptname||Unassigned_Skill>[quantity=1]] [i@<player.inventory.slot[2].scriptname||Unassigned_Skill>[quantity=1]] [i@<player.inventory.slot[3].scriptname||Unassigned_Skill>[quantity=1]] [i@<player.inventory.slot[4].scriptname||Unassigned_Skill>[quantity=1]] [i@<player.inventory.slot[5].scriptname||Unassigned_Skill>[quantity=1]] [i@<player.inventory.slot[6].scriptname||Unassigned_Skill>[quantity=1]] [] [] [i@Exit_Icon]"
 
@@ -121,10 +134,93 @@ Berserker_Skills_Menu_Handler:
     - inject Selection_Process
     on player clicks Whirlwind in Berserker_Skills_Menu:
     - inject Selection_Process
+    on player clicks Smash in Berserker_Skills_Menu:
+    - inject Selection_Process
     on player clicks Exit_Icon in Berserker_Skills_Menu:
     - inventory close
     on player closes Berserker_Skills_Menu:
     - inject Skill_Bar_Management
+
+Smash:
+  type: item
+  debug: false
+  material: bone
+  display name: <&c><&l>Smash
+  lore:
+  - <&a>Optional Skill
+  - <&2>Type<&co> <&a>[Launch] <&6>AoE Damage
+  - <&2>Description<&co> <&6>Leap a short distance into the
+  - <&6>air, then do a massive blow into the ground sending
+  - <&6>a shockwave forward dealing damage to all enemies.
+  - <&sp>
+  - <&2>Damage<&co> <&e><s@Berserker_Skill_Config.yaml_key[Smash_Damage].as_int||1>
+  - <&2>Range<&co> <&e><s@Berserker_Skill_Config.yaml_key[Smash_Range].mul[<s@Berserker_Skill_Config.yaml_key[Smash_Repetition].sub[1].as_int||4>].as_int||1>
+  - <&2>Cooldown<&co> <&e><s@Berserker_Skill_Config.yaml_key[Smash_Cooldown].as_int||1>
+  - <&2><s@Berserker_Stat_Config.yaml_key[Class_Resource]||Mana> Cost<&co> <&e><s@Berserker_Skill_Config.yaml_key[Smash_Cost].as_int||1>
+
+Smash_Cast:
+  type: task
+  debug: false
+  speed: 0
+  script:
+    - if !<player.has_flag[Enraged]> {
+      - narrate "<&a><&l>[Skill] <&7>You are not <&f>Enraged<&7>!"
+      - queue clear
+    }
+    - if <player.location.below.material> != m@air || <player.location.material> != m@air {
+      - push <player> origin:<player.location> destination:<player.location.add[0,5,0]> speed:1.05 duration:1t script:Smash_Effect no_damage no_rotate
+      - run locally Smash_Knockdown delay:0.75s
+    }
+    else {
+      - narrate "<&a><&l>[Skill] <&7>You cannot you this ability while you are midair!"
+      - queue clear
+    }
+  Smash_Knockdown:
+    - define Destination <player.location.add[<player.location.direction.vector.mul[1.5]>]>
+    - push <player> origin:<player.location> destination:<def[Destination].sub[0,2.5,0]> speed:1.5 duration:1t no_damage no_rotate
+
+Smash_Effect:
+  type: task
+  debug: false
+  speed: 0
+  script:
+    - flag player In_Air duration:5s
+    - wait 10t
+    - while <player.has_flag[In_Air]> {      
+      - if <player.location.below.material> != m@air {
+        - flag player In_Air:!
+      }
+      - wait 1t
+    }
+    - playsound <def[Location]> sound:ENTITY_ENDERDRAGON_FIREBALL_EXPLODE volume:50 pitch:1
+    - define Vector <l@0,0,0.with_pose[2,<player.location.yaw>].direction.vector.mul[2]>
+    - define Location <player.location.sub[0,0.4,0]>
+    - repeat <s@Berserker_Skill_Config.yaml_key[Smash_Repetition].as_int||5> {
+      - run locally Smash_Particle_Effect def:<def[Location]>
+      - define Location <def[Location].add[<def[Vector]>]>
+      - foreach <def[Location].find.living_entities.within[<s@Berserker_Skill_Config.yaml_key[Smash_Range].as_decimal||2>].exclude[<player>]> {
+        - define Target <def[Value]>
+        - inject Target_Check
+        - if <def[Target_Check]> == True {
+          - run locally Smash_Damage_Effect def:<def[Value]>
+        }
+      }
+      - wait 3t
+    }
+  Smash_Particle_Effect:
+    - repeat 2 {
+      - playeffect <def[1]> effect:blockcrack_1 visibility:25 quantity:20 offset:0.7,0,0.7
+      - wait 1t
+    }
+  Smash_Damage_Effect:
+    - define Target <def[1]>
+    - if !<def[Target].has_flag[Smash]> && <def[Target].flag[Smash]> != <player.name> {
+        - hurt <s@Berserker_Skill_Config.yaml_key[Smash_Damage].as_int||45> <def[Target]> cause:custom
+        - define Vector <player.location.x.sub[<def[Target].location.x>].mul[-1].round_to[1]>,2.75,<player.location.z.sub[<def[Target].location.z>].mul[-1].round_to[1]>
+        - push <def[Target]> origin:<def[Target].location> destination:<def[Target].location.add[<def[Vector]>]> speed:1 duration:1t no_damage no_rotate
+        - flag <def[Target]> Smash:<player.name> duration:1s
+    }
+
 
 Whirlwind:
   type: item
@@ -134,51 +230,86 @@ Whirlwind:
   lore:
   - <&a>Optional Skill
   - <&2>Type<&co> <&a>[Multicast AoE] <&6>Damage
-  - <&2>Description<&co> <&6>Deal damage in an area around you.
-  - <&6>With each cast damage is increased.
+  - <&2>Description<&co> <&6>Deal damage in an area around you. 
+  - <&6>Can be activated <&e>3 <&6>times in total with each cast 
+  - <&6>dealing increased damage.
   - <&sp>
   - <&6>Only usable while <&e><&o>Enraged!
+  - <&sp>
+  - <&2>Damage<&co> <&e><s@Berserker_Skill_Config.yaml_key[Whirlwind_Damage].as_int||1>
+  - <&2>Increase<&co> <&e><s@Berserker_Skill_Config.yaml_key[Whirlwind_Increase].as_int||1>
+  - <&2>Range<&co> <&e><s@Berserker_Skill_Config.yaml_key[Whirlwind_Range].as_int||1>
+  - <&2>Reactivation Time<&co> <&e><s@Berserker_Skill_Config.yaml_key[Whirlwind_Reactivation].as_int||1>
+  - <&2>Cooldown<&co> <&e><s@Berserker_Skill_Config.yaml_key[Whirlwind_Cooldown].as_int||1>
+  - <&2><s@Berserker_Stat_Config.yaml_key[Class_Resource]||Mana> Cost<&co> <&e><s@Berserker_Skill_Config.yaml_key[Whirlwind_Cost].as_int||1>
 
 Whirlwind_Cast:
   type: task
-  debug: true
+  debug: false
   speed: 0
   script:
-  - if !<player.has_flag[Enraged]> {
-      - narrate "<&a><&l>[Skill] <&7>You are not <&f>Enraged<&7>!"
-      - queue clear
+    - if !<player.has_flag[Enraged]> {
+        - narrate "<&a><&l>[Skill] <&7>You are not <&f>Enraged<&7>!"
+        - queue clear
+      }
+    - if !<player.has_flag[Whirlwind]> {
+      - define Multi_Cast true
+      - define Whirlwind_Damage <s@Berserker_Skill_Config.yaml_key[Whirlwind_Damage].as_int||10>
+      - foreach <player.location.find.living_entities.within[<s@Berserker_Skill_Config.yaml_key[Whirlwind_Range].as_int||4>].exclude[<player>]> {
+        - define Target <def[Value]>
+        - inject Target_Check
+        - if <def[Target_Check]> == True {
+          - run locally Whirlwind_Damage_Effect def:<def[Target]>|<def[Whirlwind_Damage]>
+        }
+      }
+      - flag player Whirlwind_Cooldown duration:1.5s
+      - flag player Whirlwind:1 duration:<s@Berserker_Skill_Config.yaml_key[Whirlwind_Reactivation].as_int||5>s
+      - run locally Whirlwind_Reactivation def:<def[Skill_Slot]>
     }
-  - if !<player.has_flag[Whirlwind]> {
-    - define Multi_Cast true
-    - define Whirlwind_Damage <s@Berserker_Skill_Config.yaml_key[Whirlwind_Damage].as_int||10>
-    - run locally Whirlwind_Effect def:<def[Whirlwind_Damage]>
-    - flag player Whirlwind_Cooldown duration:1.5s
-    - flag player Whirlwind:1 duration:5s
-  }
-  else if <player.has_flag[Whirlwind]> && <player.flag[Whirlwind]> == 1 {
-    - define Multi_Cast true
-    - define Whirlwind_Base_Damage <s@Berserker_Skill_Config.yaml_key[Whirlwind_Damage].as_int||10>
-    - define Whirlwind_Damage <def[Whirlwind_Base_Damage].add[<s@Berserker_Skill_Config.yaml_key[Whirlwind_Increase].as_int||5>]>
-    - run locally Whirlwind_Effect def:<def[Whirlwind_Damage]>
-    - flag player Whirlwind_Cooldown duration:1.5s
-    - flag player Whirlwind:2 duration:5s
-  }
-  else if <player.has_flag[Whirlwind]> && <player.flag[Whirlwind]> == 2 {
-    - define Multi_Cast false
-    - define Whirlwind_Base_Damage <s@Berserker_Skill_Config.yaml_key[Whirlwind_Damage].as_int||10>
-    - define Whirlwind_Bonus_Damage <s@Berserker_Skill_Config.yaml_key[Whirlwind_Increase].as_int||5>
-    - define Whirlwind_Damage <def[Whirlwind_Base_Damage].add[<def[Whirlwind_Bonus_Damage].mul[2]>]>
-    - run locally Whirlwind_Effect def:<def[Whirlwind_Damage]>
-    - flag player Whirlwind:!
-  }
-  Whirlwind_Effect:
-  - foreach <player.location.find.living_entities.within[<s@Berserker_Skill_Config.yaml_key[Whirlwind_Range].as_int||4>].exclude[<player>]> {
-    - hurt <def[1]> <def[Value]> cause:custom
-  }
-  - repeat 4 {
-    - playeffect <player.location> effect:SWEEP_ATTACK visibility:30 quantity:7 offset:1,0,1
-    - wait 1t
-  }
+    else if <player.has_flag[Whirlwind]> && <player.flag[Whirlwind]> == 1 {
+      - define Multi_Cast true
+      - define Whirlwind_Base_Damage <s@Berserker_Skill_Config.yaml_key[Whirlwind_Damage].as_int||10>
+      - define Whirlwind_Damage <def[Whirlwind_Base_Damage].add[<s@Berserker_Skill_Config.yaml_key[Whirlwind_Increase].as_int||5>]>
+      - foreach <player.location.find.living_entities.within[<s@Berserker_Skill_Config.yaml_key[Whirlwind_Range].as_int||4>].exclude[<player>]> {
+        - define Target <def[Value]>
+        - inject Target_Check
+        - if <def[Target_Check]> == True {
+          - run locally Whirlwind_Damage_Effect def:<def[Target]>|<def[Whirlwind_Damage]>
+        }
+      }
+      - flag player Whirlwind_Cooldown duration:1.5s
+      - flag player Whirlwind:2 duration:<s@Berserker_Skill_Config.yaml_key[Whirlwind_Reactivation].as_int||5>s
+      - run locally Whirlwind_Reactivation def:<def[Skill_Slot]>
+    }
+    else if <player.has_flag[Whirlwind]> && <player.flag[Whirlwind]> == 2 {
+      - define Multi_Cast false
+      - define Whirlwind_Base_Damage <s@Berserker_Skill_Config.yaml_key[Whirlwind_Damage].as_int||10>
+      - define Whirlwind_Bonus_Damage <s@Berserker_Skill_Config.yaml_key[Whirlwind_Increase].as_int||5>
+      - define Whirlwind_Damage <def[Whirlwind_Base_Damage].add[<def[Whirlwind_Bonus_Damage].mul[2]>]>
+      - foreach <player.location.find.living_entities.within[<s@Berserker_Skill_Config.yaml_key[Whirlwind_Range].as_int||4>].exclude[<player>]> {
+        - define Target <def[Value]>
+        - inject Target_Check
+        - if <def[Target_Check]> == True {
+          - run locally Whirlwind_Damage_Effect def:<def[Target]>|<def[Whirlwind_Damage]>
+        }
+      }
+      - flag player Whirlwind:3 duration:5s
+    }
+  Whirlwind_Damage_Effect:
+    - hurt <def[2]> <def[1]> cause:custom
+    - repeat 4 {
+      - playeffect <player.location> effect:SWEEP_ATTACK visibility:30 quantity:7 offset:1,0,1
+      - wait 1t
+    }
+  Whirlwind_Reactivation:
+    - define Reactivation_Time <s@Berserker_Skill_Config.yaml_key[Whirlwind_Reactivation].as_int||5>
+    - wait <def[Reactivation_Time].add[0.5]>s
+    - if !<player.has_flag[Whirlwind]> {
+      - define Skill_Cooldown Whirlwind_Cooldown
+      - define Skill_Slot <def[1]>
+      - flag player Whirlwind_Cooldown duration:<s@Berserker_Skill_Config.yaml_key[Whirlwind_Cooldown].sub[<def[Reactivation_Time]>]||5>s
+      - inject Cooldown_Manager
+    }
 
 Hamstring:
   type: item
@@ -188,7 +319,14 @@ Hamstring:
   lore:
   - <&a>Optional Skill
   - <&2>Type<&co> <&a>[On-Hit] <&6>Slow + Debuff
-  - <&2>Description<&co> <&6>Slow target and decrease melee damage.
+  - <&2>Description<&co> <&6>Strike your opponent slowing the target
+  - <&6>and decreasing their melee damage.
+  - <&sp>
+  - <&2>Damage<&co> <&e><s@Berserker_Skill_Config.yaml_key[Hamstring_Damage].as_int||1>
+  - <&2>Debuff<&co> <&e><s@Berserker_Skill_Config.yaml_key[Hamstring_Debuff].mul[100].as_int||1>%
+  - <&2>Duration<&co> <&e><s@Berserker_Skill_Config.yaml_key[Hamstring_Duration].as_int||1>
+  - <&2>Cooldown<&co> <&e><s@Berserker_Skill_Config.yaml_key[Hamstring_Cooldown].as_int||1>
+  - <&2><s@Berserker_Stat_Config.yaml_key[Class_Resource]||Mana> Cost<&co> <&e><s@Berserker_Skill_Config.yaml_key[Hamstring_Cost].as_int||1>
 
 Hamstring_Cast:
   type: task
@@ -205,9 +343,22 @@ Hamstring_Effect:
     - if <context.damager.flag[Class]> == Berserker && <context.damager.has_flag[Hamstring_Effect]> {
       - flag <context.damager> Hamstring_Effect:!
       - define Target <context.entity>
-      - cast slow <def[Target]> duration:<s@Berserker_Skill_Config.yaml_key[Hamstring_Duration].as_duration||6s> power:<s@Berserker_Skill_Config.yaml_key[Hamstring_Power].as_int||1> hide_particles
-      - hurt <s@Berserker_Skill_Config.yaml_key[Hamstring_Damage].as_int||15> <def[Target]>
+      - inject Target_Check
+      - if <def[Target_Check]> == True {
+        - run Hamstring_Damage_Effect def:<def[Target]>
+      }
     }
+
+Hamstring_Damage_Effect:
+  type: task
+  debug: false
+  speed: 0
+  script:
+    - define Target <def[1]>
+    - cast slow <def[Target]> duration:<s@Berserker_Skill_Config.yaml_key[Hamstring_Duration].as_duration||6s> power:<s@Berserker_Skill_Config.yaml_key[Hamstring_Power].as_int||1> hide_particles
+    - hurt <s@Berserker_Skill_Config.yaml_key[Hamstring_Damage].as_int||15> <def[Target]> cause:custom
+    - run Damage_Decrease_Effect def:<s@Berserker_Skill_Config.yaml_key[Hamstring_Duration].as_int||6>|<s@Berserker_Skill_Config.yaml_key[Hamstring_Debuff].as_decimal||0.2>
+
 
 Enraged_Regeneration:
   type: item
@@ -221,6 +372,11 @@ Enraged_Regeneration:
   - <&6>your health over the duration of the skill.
   - <&sp>
   - <&6>Only usable while <&e><&o>Enraged!
+  - <&sp>
+  - <&2>Health<&co> <&e><s@Berserker_Skill_Config.yaml_key[Enraged_Regeneration_Heal_Procentage].mul[<s@Berserker_Skill_Config.yaml_key[Enraged_Regeneration_Ticks].mul[100]||1>].as_int||1>%
+  - <&2>Duration<&co> <&e><s@Berserker_Skill_Config.yaml_key[Enraged_Regeneration_Period].mul[<s@Berserker_Skill_Config.yaml_key[Enraged_Regeneration_Ticks]||1>]||1>
+  - <&2>Cooldown<&co> <&e><s@Berserker_Skill_Config.yaml_key[Enraged_Regeneration_Cooldown].as_int||1>
+  - <&2><s@Berserker_Stat_Config.yaml_key[Class_Resource]||Mana> Cost<&co> <&e><s@Berserker_Skill_Config.yaml_key[Enraged_Regeneration_Cost].as_int||1>
 
 Enraged_Regeneration_Cast:
   type: task
@@ -231,7 +387,20 @@ Enraged_Regeneration_Cast:
       - narrate "<&a><&l>[Skill] <&7>You are not <&f>Enraged<&7>!"
       - queue clear
     }
-    - run HoT_Effect def:<player.health.max.mul[<s@Berserker_Skill_Config.yaml_key[Enraged_Regeneration_Heal_Procentage].as_decimal||0.05>]>|<s@Berserker_Skill_Config.yaml_key[Enraged_Regeneration_Repeat].as_int||5>|<s@Berserker_Skill_Config.yaml_key[Enraged_Regeneration_Interval].as_int||2> player:<player>
+    - run locally Enraged_Regeneration_Effect def:<player.health.max.mul[<s@Berserker_Skill_Config.yaml_key[Enraged_Regeneration_Heal_Procentage].as_decimal||0.05>]>|<s@Berserker_Skill_Config.yaml_key[Enraged_Regeneration_Ticks].as_int||5>|<s@Berserker_Skill_Config.yaml_key[Enraged_Regeneration_Period].as_int||2> player:<player>
+    - run locally Enraged_Regeneration_Particle_Effect
+  Enraged_Regeneration_Effect:
+    - repeat <def[2]||4> {
+      - heal <def[1]||0.05> <player>
+      - wait <def[3]>s
+    }
+  Enraged_Regeneration_Particle_Effect:
+    - define Duration <s@Berserker_Skill_Config.yaml_key[Enraged_Regeneration_Period].mul[<s@Berserker_Skill_Config.yaml_key[Enraged_Regeneration_Ticks]||1>].as_int||10>
+    - repeat <def[Duration].mul[5]> {
+      - playeffect <player.location> effect:REDSTONE data:0 visibility:30 quantity:5 offset:0.3
+      - wait 2t
+    }
+
 
 Axe_Throw:
   type: item
@@ -244,6 +413,11 @@ Axe_Throw:
   - <&2>Description<&co> <&6>Hurl an axe in the direction that you 
   - <&6>are facing, dealing damage for a duration to the 
   - <&6>target that it hits.
+  - <&sp>
+  - <&2>Damage<&co> <&e><s@Berserker_Skill_Config.yaml_key[Axe_Throw_Damage].mul[<s@Berserker_Skill_Config.yaml_key[Axe_Throw_Ticks]||1>]||1>
+  - <&2>Duration<&co> <&e><s@Berserker_Skill_Config.yaml_key[Axe_Throw_Ticks].mul[<s@Berserker_Skill_Config.yaml_key[Axe_Throw_Period]||1>]||1>
+  - <&2>Cooldown<&co> <&e><s@Berserker_Skill_Config.yaml_key[Axe_Throw_Cooldown].as_int||1>
+  - <&2><s@Berserker_Stat_Config.yaml_key[Class_Resource]||Mana> Cost<&co> <&e><s@Berserker_Skill_Config.yaml_key[Axe_Throw_Cost].as_int||1>
 
 Axe_Throw_Cast:
   type: task
@@ -268,6 +442,12 @@ Axe_Throw_Effect:
     - if <def[Target]> == null {
       - queue clear
     }
+    - inject Target_Check
+    - if <def[Target_Check]> == True {
+      - run locally Axe_Throw_Damage_Effect def:<def[Target]>
+    }
+  Axe_Throw_Damage_Effect:
+    - define Target <def[1]>
     - repeat <s@Berserker_Skill_Config.yaml_key[Axe_Throw_Ticks].as_int||5> {
       - if <def[Target].health||null> == null {
         - queue clear
@@ -276,7 +456,6 @@ Axe_Throw_Effect:
       - playeffect <def[Target].location> effect:iconcrack_331 quantity:10 offset:0.3
       - wait <s@Berserker_Skill_Config.yaml_key[Axe_Throw_Period].as_duration||2s>
     }
-
 Charge:
   type: item
   debug: false
@@ -286,8 +465,12 @@ Charge:
   - <&a>Optional Skill
   - <&2>Type<&co> <&a>[Launch] <&6>Mobility
   - <&2>Description<&co> <&6>Charge forward stunning everybody
-  - <&6>where you land, dealing damage to them and
-  - <&6>generating rage.
+  - <&6>where you land and dealing damage.
+  - <&sp>
+  - <&2>Damage<&co> <&e><s@Berserker_Skill_Config.yaml_key[Charge_Damage].as_int||1>
+  - <&2>Stun Duration<&co> <&e><s@Berserker_Skill_Config.yaml_key[Charge_Stun_Duration].as_int||1>
+  - <&2>Radius<&co> <&e><s@Berserker_Skill_Config.yaml_key[Charge_Radius].as_int||1>
+  - <&2>Cooldown<&co> <&e><s@Berserker_Skill_Config.yaml_key[Charge_Cooldown].as_int||1>
 
 Charge_Cast:
   type: task
@@ -317,14 +500,24 @@ Charge_Effect:
     }
     - foreach <player.location.find.living_entities.within[<s@Berserker_Skill_Config.yaml_key[Charge_Radius].as_decimal||2>].exclude[<player>]> {
       - define Target <def[Value]>
-      - run Stun_Effect def:<s@Berserker_Skill_Config.yaml_key[Overpower_Stun_Duration].as_decimal||2.5>|<def[Target]>
-      - hurt <s@Berserker_Skill_Config.yaml_key[Charge_Damage].as_int||5> <def[Target]> cause:custom 
+      - inject Target_Check
+      - if <def[Target_Check]> == True {
+        - run locally Charge_Damage_Effect def:<def[Target]>
+      }
     }
-    - define Location <player.location.below>
-    - playsound <def[Location]> sound:ENTITY_ENDERDRAGON_FIREBALL_EXPLODE volume:50 pitch:1
-    - repeat 4 {
-      - playeffect <def[Location]> effect:LAVA visibility:25 quantity:15 offset:1.0,0,1.0 
+    - playsound <player.location> sound:ENTITY_ENDERDRAGON_FIREBALL_EXPLODE volume:50 pitch:1
+    - repeat 3 {
+      - playeffect <player.location.below> effect:LAVA visibility:25 quantity:15 offset:1.0,0,1.0 
       - wait 1t
+    }
+  Charge_Damage_Effect:
+    - define Target <def[1]>
+    - hurt <s@Berserker_Skill_Config.yaml_key[Charge_Damage].as_int||5> <def[Target]> cause:custom
+    - if !<def[Target].has_flag[Stun_Effect]> {
+      - run Stun_Effect def:<s@Berserker_Skill_Config.yaml_key[Charge_Stun_Duration].as_decimal||2.5>|<def[Target]>
+    }
+    else if <def[Target].has_flag[Stun_Effect]> {
+      - flag <def[Target]> Stun_Effect duration:<def[Target].flag[Stun_Effect].expiration.add[<s@Berserker_Skill_Config.yaml_key[Charge_Stun_Duration].as_decimal||1>]>
     }
 
 Overpower:
@@ -339,6 +532,13 @@ Overpower:
   - <&6>the target stunning and dealing damage.
   - <&sp>
   - <&6>Only usable while <&e><&o>Enraged!
+  - <&sp>
+  - <&2>Damage<&co> <&e><s@Berserker_Skill_Config.yaml_key[Overpower_Damage].as_int||1>
+  - <&2>Stun Duration<&co> <&e><s@Berserker_Skill_Config.yaml_key[Overpower_Stun_Duration].as_decimal||1>
+  - <&2>Range<&co> <&e><s@Berserker_Skill_Config.yaml_key[Overpower_Range].as_int||1>
+  - <&2>Cooldown<&co> <&e><s@Berserker_Skill_Config.yaml_key[Overpower_Cooldown].as_int||1>
+  - <&2><s@Berserker_Stat_Config.yaml_key[Class_Resource]||Mana> Cost<&co> <&e><s@Berserker_Skill_Config.yaml_key[Overpower_Cost].as_int||1>
+
 
 Overpower_Cast:
   type: task
@@ -349,26 +549,34 @@ Overpower_Cast:
       - narrate "<&a><&l>[Skill] <&7>You are not <&f>Enraged<&7>!"
       - queue clear
     }
-    - define target <player.target.within[<s@Berserker_Skill_Config.yaml_key[Overpower_Range].as_int||5>]>
-    - if <def[target]> != null {
-      - if <def[target].entity_type> == ARMOR_STAND {
-        - define new_target <def[target].location.find.living_entities.within[1].exclude[<player>|<def[target]>].get[1]>
-        - run Stun_Effect def:<s@Berserker_Skill_Config.yaml_key[Overpower_Stun_Duration].as_decimal||2>|<def[new_target]>
-        - push <player> destination:<def[new_target].location.add[0,0.3,0]> speed:0.8 duration:1t no_rotate no_damage
-        - hurt <s@Berserker_Skill_Config.yaml_key[Overpower_Damage].as_int||15> <def[new_target]> cause:custom 
-        - playeffect <def[new_target].location.add[0,1,0]> effect:blockcrack_152 visibility:25 quantity:15 offset:0.4
-        - define target <def[new_target]>
+    - define Target <player.target.within[<s@Berserker_Skill_Config.yaml_key[Overpower_Range].as_int||5>]>
+    - if <def[Target]> != null {
+      - if <def[Target].entity_type> == ARMOR_STAND {
+        - define Target <def[Target].location.find.living_entities.within[1].exclude[<player>|<def[Target]>].get[1]>
+        - inject Target_Check
+        - if <def[Target_Check]> == True {
+          - run locally Overpower_Damage_Effect def:<def[Target]>
+        }
       }
       else {
-        - run Stun_Effect def:<s@Berserker_Skill_Config.yaml_key[Overpower_Stun_Duration].as_decimal||2>|<def[target]>
-        - push <player> destination:<def[target].location.add[0,0.3,0]> speed:0.8 duration:1t no_rotate no_damage
-        - hurt <s@Berserker_Skill_Config.yaml_key[Overpower_Damage].as_int||15> <def[target]> cause:custom 
-        - playeffect <def[target].location.add[0,1,0]> effect:blockcrack_152 visibility:25 quantity:15 offset:0.4
+        - inject Target_Check
+        - if <def[Target_Check]> == True {
+          - run locally Overpower_Damage_Effect def:<def[Target]>
+        }
       }
     }
-    else {
-      - queue clear
+  Overpower_Damage_Effect:
+    - define Target <def[1]>
+    - if !<def[Target].has_flag[Stun_Effect]> {
+      - run Stun_Effect def:<s@Berserker_Skill_Config.yaml_key[Overpower_Stun_Duration].as_decimal||2>|<def[Target]>
     }
+    else if <def[Target].has_flag[Stun_Effect]> {
+      - flag <def[Target]> Stun_Effect duration:<def[Target].flag[Stun_Effect].expiration.add[<s@Berserker_Skill_Config.yaml_key[Overpower_Stun_Duration].as_decimal||1>]>
+    }
+    - push <player> destination:<def[Target].location.add[0,0.3,0]> speed:0.8 duration:1t no_rotate no_damage
+    - hurt <s@Berserker_Skill_Config.yaml_key[Overpower_Damage].as_int||15> <def[Target]> cause:custom
+    - playeffect <def[Target].location.add[0,1,0]> effect:blockcrack_152 visibility:25 quantity:15 offset:0.4
+
 
 Battle_Cry:
   type: item
@@ -378,14 +586,15 @@ Battle_Cry:
   lore:
   - <&e>Default Skill
   - <&2>Type<&co> <&a>[Self Cast] <&6>Damage buff + AoE interrupt
-  - <&2>Description<&co> <&6>Let out a terrifying howl interrupting 
-  - <&6>nearby enemies. 
+  - <&2>Description<&co> <&6>Let out a terrifying howl increasing
+  - <&6>your melee damage. 
   - <&sp>
-  - <&6>Additionally if you are carrying an axe in your 
-  - <&6>off-hand you will also gain a physical damage 
-  - <&6>increase. While the effect is active you will be 
-  - <&6>considered <&e><&o>Enraged<&6>, lasting the duration of 
-  - <&6>the buff.
+  - <&6>While this effect is active you will be considered <&e><&o>Enraged<&6>.
+  - <&sp>
+  - <&2>Buff<&co> <&e><s@Berserker_Skill_Config.yaml_key[Battle_Cry_Buff].mul[100].round||1>%
+  - <&2>Duration<&co> <&e><s@Berserker_Skill_Config.yaml_key[Battle_Cry_Duration].as_int||1>
+  - <&2>Cooldown<&co> <&e><s@Berserker_Skill_Config.yaml_key[Battle_Cry_Cooldown].as_int||1>
+  - <&2><s@Berserker_Stat_Config.yaml_key[Class_Resource]||Mana> Cost<&co> <&e><s@Berserker_Skill_Config.yaml_key[Battle_Cry_Cost].as_int||1>
 
 Battle_Cry_Cast:
   type: task
@@ -407,6 +616,11 @@ Cleave:
   - <&2>Type<&co> <&a>[Cone Attack] <&6>Cone damage 
   - <&2>Description<&co> <&6>Do a powerful cleaving strike 
   - <&6>dealing damage to all enemies in front of you.
+  - <&sp>
+  - <&2>Damage<&co> <&e><s@Berserker_Skill_Config.yaml_key[Cleave_Damage].as_int||1>
+  - <&2>Range<&co> <&e><s@Berserker_Skill_Config.yaml_key[Cleave_Range].as_int||1>
+  - <&2>Cooldown<&co> <&e><s@Berserker_Skill_Config.yaml_key[Cleave_Cooldown].as_int||1>
+  - <&2><s@Berserker_Stat_Config.yaml_key[Class_Resource]||Mana> Cost<&co> <&e><s@Berserker_Skill_Config.yaml_key[Cleave_Cost].as_int||1>
 
 Cleave_Cast:
   type: task
@@ -416,9 +630,16 @@ Cleave_Cast:
     - playeffect <player.location.cursor_on[2].sub[0,0.5,0]> effect:SWEEP_ATTACK quantity:2 offset:0.2
     - foreach <player.location.find.living_entities.within[<s@Berserker_Skill_Config.yaml_key[Cleave_Range].as_int||6>].exclude[<player>]> {
       - if <player.location.facing[<def[Value]>]> {
-        - hurt <s@Berserker_Skill_Config.yaml_key[Cleave_Damage].as_int||5> <def[Value]> cause:custom
+        - define Target <def[Value]>
+        - inject Target_Check
+        - if <def[Target_Check]> == True {
+          - run locally Cleave_Damage_Effect def:<def[Target]>
+        }
       }
     }
+  Cleave_Damage_Effect:
+    - hurt <s@Berserker_Skill_Config.yaml_key[Cleave_Damage].as_int||5> <def[1]> cause:custom
+     
 
 Inner_Rage:
   type: item
@@ -429,7 +650,9 @@ Inner_Rage:
   - <&e>Default Skill
   - <&2>Type<&co> <&a>[Passive] <&6>Resource Generation
   - <&2>Description<&co> <&6>Each melee attack will grant you
-  - <&6>rage, which you can spent on abilities.
+  - <&6>rage, which you can spent on abilities. Additionally 
+  - <&6>your attacks have chance to make you <&e><&o>Enraged <&6>for 
+  - <&6>a short duration.
   - <&sp>
-  - <&6>Additionally your attacks have chance to make you
-  - <&e><&o>Enraged <&6>for a short duration.
+  - <&2><s@Berserker_Stat_Config.yaml_key[Class_Resource]||Mana> Per Hit<&co> <&e><s@Berserker_Skill_Config.yaml_key[Inner_Rage_Resource].as_int||1>
+  - <&2>Enrage Chance<&co> <&e><s@Berserker_Skill_Config.yaml_key[Inner_Rage_Chance].as_int||1>%

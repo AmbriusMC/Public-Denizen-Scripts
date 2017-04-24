@@ -3,10 +3,20 @@ Target_Check:
   debug: false
   speed: 0
   script:
-    - if <yaml[<def[target].uuid>].read[faction.name]||Outlaw1> == <yaml[player.uuid>].read[faction.name]||Outlaw2> && <yaml[<def[target].uuid>].read[faction.outlaw]||False> == False {
-      - queue clear
+    - if <def[Target].is_player> && <def[Target].gamemode.id> == 2 {
+      - if <yaml[<def[Target].uuid>].read[faction.name]||Outlaw1> != <yaml[<player.uuid>].read[faction.name]||Outlaw2> && <yaml[<def[target].uuid>].read[faction.outlaw]||False> == False {
+        - flag player In_Combat duration:20s
+        - flag <def[Target]> In_Combat duration:20s
+        - define Target_Check True
+      }
+      else {
+        - define Target_Check False
+      }
     }
-    ### Add Anti PvP hopping eventually
+    else {
+      - flag player In_Combat duration:20s
+      - define Target_Check True
+    }
 
 Damage_Management:
   type: world
@@ -14,14 +24,22 @@ Damage_Management:
   events:
     on player damaged by FALL:
     - determine cancelled
-    on player damages entity:
-    - if <context.cause> == ENTITY_ATTACK {
+    on entity damages entity:
+    - if <context.cause> == entity_attack {
       - if <context.damager.has_flag[Stun_Effect]> {
-        - narrate "<&a><&l>[Skill]> <&7>You are stunned for another <&f><player.flag[Stun_Effect].expiration.in_seconds.round_to[1]>s<&7>!"
+        - if <context.damager.is_player> {
+          - narrate "<&a><&l>[Skill]> <&7>You are stunned for another <&f><player.flag[Stun_Effect].expiration.in_seconds.round_to[1]>s<&7>!"
+        }
         - determine cancelled
       }
-      - define Class_Stat_Config s@<context.damager.flag[Class]>_Stat_Config
-      - define Damage_Modifier <yaml[<player.uuid>].read[General.Damage_Modifier]||1>
-      - define Damage <def[Class_Stat_Config].yaml_key[Melee_Damage].mul[<def[Damage_Modifier]>]||1>
+      - if <context.damager.is_player> {
+        - define Class_Stat_Config s@<context.damager.flag[Class]>_Stat_Config
+      }
+      - define Damage <def[Class_Stat_Config].yaml_key[Melee_Damage].mul[<yaml[<player.uuid>].read[General.Damage_Modifier]||1>]||<context.final_damage>>
+      - if <context.entity.has_flag[Unstoppable]> {
+        - hurt <def[Damage]> <context.entity> cause:entity_attack
+        - determine cancelled
+      }
       - determine <def[Damage]>
     }
+

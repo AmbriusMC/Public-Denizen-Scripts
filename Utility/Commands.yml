@@ -1,6 +1,6 @@
 Home:
   type: command
-  debug: true
+  debug: false
   name: Home
   usage: /Home (set/player)
   description: Teleports you to your home. Alternatively set your home or teleport to another player's home, which requires an additional permission. 
@@ -130,7 +130,7 @@ Warp:
 
 Mob:
   type: command
-  debug: true
+  debug: false
   name: Mob
   usage: /Mob (entity/list) (amount) (x,y,z,World)
   description: Spawn entities or display a list of spawnable entities.
@@ -204,7 +204,7 @@ Mob:
 
 Repair_Command:
   type: command
-  debug: true
+  debug: false
   name: Repair
   usage: /Repair
   description: Changes the item stack in your hand to 64 of the item.

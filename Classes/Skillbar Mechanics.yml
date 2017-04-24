@@ -71,21 +71,29 @@ Cast_Sequence:
     - narrate "<parse:<def[Message]>>" targets:<player.location.find.players.within[25]>
     - if <def[Multi_Cast]||false> == false {
       - flag player <def[Skill_Cooldown]> duration:<def[Class_Skill_Config].yaml_key[<def[Skill_Cooldown]>].as_int||10>
-      - repeat <def[Class_Skill_Config].yaml_key[<def[Skill_Cooldown]>].as_int.mul[1.5]||15> {
-        - if !<player.is_online> {
-          - goto Offline_Skip
-        }
-        - if !<player.has_flag[<def[Skill_Cooldown]>]> {
-          - adjust <player.inventory.slot[<def[Skill_Slot]>]> quantity:1 save:Cooldown
-          - inventory set origin:<entry[Cooldown].result> slot:<def[Skill_Slot]>
-          - queue clear
-        }
-        - adjust <player.inventory.slot[<def[Skill_Slot]>]> quantity:<player.flag[<def[Skill_Cooldown]>].expiration.in_seconds.round> save:Cooldown
-        - inventory set origin:<entry[Cooldown].result> slot:<def[Skill_Slot]>
-        - mark Offline_Skip
-        - wait 0.75s
-      }
+      - inject Cooldown_Manager
     }
+
+Cooldown_Manager:
+  type: task
+  debug: false
+  speed: 0
+  script:
+  - repeat <def[Class_Skill_Config].yaml_key[<def[Skill_Cooldown]>].as_int.mul[1.5]||15> {
+    - if !<player.is_online> {
+      - goto Offline_Skip
+    }
+    - if !<player.has_flag[<def[Skill_Cooldown]>]> {
+      - adjust <player.inventory.slot[<def[Skill_Slot]>]> quantity:1 save:Cooldown
+      - inventory set origin:<entry[Cooldown].result> slot:<def[Skill_Slot]>
+      - queue clear
+    }
+    - adjust <player.inventory.slot[<def[Skill_Slot]>]> quantity:<player.flag[<def[Skill_Cooldown]>].expiration.in_seconds.round> save:Cooldown
+    - inventory set origin:<entry[Cooldown].result> slot:<def[Skill_Slot]>
+    - mark Offline_Skip
+    - wait 0.75s
+  }
+
 
 Unassigned_Skill:
   type: item

@@ -1,12 +1,17 @@
 Particle_Projectile:
   type: world
-  debug: true
+  debug: false
   events:
     on Test command:
     - determine passively fulfilled
-    - repeat 4 {
-      - playeffect <player.location> effect:SWEEP_ATTACK visibility:30 quantity:7 offset:1,0,1
-      - wait 1t
+    - define Vector <player.location.direction.vector>
+    - narrate "1 =  <def[Vector].x.round_to[1]>,<def[Vector].y.round_to[1]>,<def[Vector].z.round_to[1]>"
+    - foreach <player.location.find.living_entities.within[10].exclude[<player>]> {
+      - define Target <def[Value]>
+      - define Vector <player.location.x.sub[<def[Target].location.x>].mul[-1].round_to[1]>,3,<player.location.z.sub[<def[Target].location.z>].mul[-1].round_to[1]>
+      - narrate "<def[Vector]>"
+      - define Speed <player.location.distance[<def[Target].location>].mul[0.19]>
+      - push <def[Target]> origin:<def[Target].location> destination:<def[Target].location.add[<def[Vector]>]> speed:<def[Speed]> duration:1t no_damage no_rotate
     }
     on check command:
     - determine passively fulfilled
@@ -22,7 +27,7 @@ Particle_Projectile:
         - if <def[Target]> == null {
           - queue clear
         }
-        - hurt 10 <def[Target]> cause:custom
+        - hurt 10 <def[Target]> cause:custom source:<player>
         - queue clear
       } 
       - playeffect <def[location]> effect:SMOKE_NORMAL visibility:30 quantity:30 offset:0.3
@@ -64,6 +69,18 @@ Damage_Boost_Effect:
     - define Damage_Modifier <yaml[<player.uuid>].read[General.Damage_Modifier]||1>
     - yaml id:<player.uuid> set General.Damage_Modifier:<def[Damage_Modifier].sub[<def[2]>]>
 
+## <def[1]> is the duration ## <def[2]> is the value ##
+Damage_Decrease_Effect:
+  type: task
+  debug: false
+  speed: 0
+  script:
+    - define Damage_Modifier <yaml[<player.uuid>].read[General.Damage_Modifier]||1>
+    - yaml id:<player.uuid> set General.Damage_Modifier:<def[Damage_Modifier].sub[<def[2]>]>
+    - wait <def[1].as_duration>
+    - define Damage_Modifier <yaml[<player.uuid>].read[General.Damage_Modifier]||1>
+    - yaml id:<player.uuid> set General.Damage_Modifier:<def[Damage_Modifier].add[<def[2]>]>
+
 ## <def[1]> is the duration ## <def[2]> is the target ##
 Stun_Effect:
   type: task
@@ -71,15 +88,13 @@ Stun_Effect:
   speed: 0
   script:
     - flag <def[2]> Stun_Effect duration:<def[1].as_duration>
-    - spawn e@armor_stand[visible=false;marker=true;gravity=false] <def[2].location> save:marker
+    - spawn e@armor_stand[visible=false;marker=true;gravity=true] <def[2].location> save:marker
     - mount <def[2]>|<entry[marker].spawned_entities.get[1]> <def[2].location>
     - run Stun_Message def:<def[1]>|<def[2]>
-    - wait <def[1].as_duration>
-    - if <player.has_flag[Stun_Effect]> {
-      - teleport <def[2]> <def[2].location.add[0,0.8,0]>
+    - while <def[2].has_flag[Stun_Effect]> {
+      - wait 2t
     }
     - flag <def[2]> Stun_Effect:!
-    - wait 1t
     - remove <entry[marker].spawned_entities.get[1]>
 
 Stun_Message:
