@@ -3,19 +3,19 @@ Target_Check:
   debug: false
   speed: 0
   script:
-    - if <def[Target].is_player> && <def[Target].gamemode.id> == 2 {
-      - if <yaml[<def[Target].uuid>].read[faction.name]||Outlaw1> != <yaml[<player.uuid>].read[faction.name]||Outlaw2> && <yaml[<def[target].uuid>].read[faction.outlaw]||False> == False {
+    - if <def[Target].is_player> && <def[Target].gamemode.id||0> == 2 {
+      - if <yaml[<def[Target].uuid>].read[faction.name]||None_Other> != <yaml[<player.uuid>].read[faction.name]||None> {
         - flag player In_Combat duration:20s
         - flag <def[Target]> In_Combat duration:20s
-        - define Target_Check True
+        - define Target_Check true
       }
       else {
-        - define Target_Check False
+        - define Target_Check false
       }
     }
     else {
       - flag player In_Combat duration:20s
-      - define Target_Check True
+      - define Target_Check true
     }
 
 Damage_Management:
@@ -33,7 +33,7 @@ Damage_Management:
         - determine cancelled
       }
       - if <context.damager.is_player> {
-        - define Class_Stat_Config s@<context.damager.flag[Class]>_Stat_Config
+        - define Class_Stat_Config s@<yaml[<player.uuid>].read[General.Class]>_Stat_Config
       }
       - define Damage <def[Class_Stat_Config].yaml_key[Melee_Damage].mul[<yaml[<player.uuid>].read[General.Damage_Modifier]||1>]||<context.final_damage>>
       - if <context.entity.has_flag[Unstoppable]> {

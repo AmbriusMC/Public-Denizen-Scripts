@@ -9,8 +9,9 @@ File_Manager:
     }
     else {
       - yaml create id:<player.uuid>
-      - yaml id:<player.uuid> set General.Mana:0
       - yaml id:<player.uuid> set General.Name:<player.name>
+      - yaml id:<player.uuid> set General.Class:Citizen
+      - yaml id:<player.uuid> set General.Mana:0
     }
     on player quits:
     - yaml "savefile:/Players/<player.uuid>.yml" id:<player.uuid>
@@ -35,13 +36,16 @@ Class_Login_Handler:
     on player logs in:
     - wait 1t
     - adjust <player> scale_health:true
-    - define Class_Stat_Config s@<player.flag[Class]>_Stat_Config
+    - define Class_Stat_Config s@<yaml[<player.uuid>].read[General.Class]>_Stat_Config
     - yaml id:<player.uuid> set General.Mana:<def[Class_Stat_Config].yaml_key[Default_Mana]||0>
     - inject Skill_Bar_Setup
     - while <player.is_online> {
       - define Mana <yaml[<player.uuid>].read[General.Mana]>
-      - adjust <player> fake_experience:<def[Mana].div[20]>|<def[Mana]>
-      - if <player.flag[Class]||Citizen> == Berserker {
+      - adjust <player> fake_experience:<def[Mana].div[<def[Class_Stat_Config].yaml_key[Max_Mana]||0>]>|<def[Mana]>
+      - if <yaml[<player.uuid>].read[General.Class]> == Saboteur {
+        - sidebar set title:<&6><&l>Info<&co> "value:<&2><&l>Health<&co> <&f><player.health.as_int>|<&2><&l>Heat<&co> <&f><yaml[<player.uuid>].read[General.Mana].as_int||0>" "players:<player>" "increment:-1"
+      }
+      - if <yaml[<player.uuid>].read[General.Class]> == Berserker {
         - if <player.has_flag[Enraged]> {
           - define Enrage Active
         }
@@ -87,12 +91,13 @@ Skill_Bar_Setup:
     }
     - wait 1t
     - if <player.gamemode.id> == 2 {
-      - if <player.flag[Class]> == Citizen {
+      - adjust <player> item_slot:7
+      - if <yaml[<player.uuid>].read[General.Class]> == Citizen {
           - queue clear
       }
-      - if <yaml[<player.uuid>].contains[<player.flag[Class]>.Skill_Bar.Skills]> {
+      - if <yaml[<player.uuid>].contains[<yaml[<player.uuid>].read[General.Class]>.Skill_Bar.Skills]> {
         - define Slot 1
-        - foreach <yaml[<player.uuid>].read[<player.flag[Class]>.Skill_Bar.Skills]> {
+        - foreach <yaml[<player.uuid>].read[<yaml[<player.uuid>].read[General.Class]>.Skill_Bar.Skills]> {
           - if <def[Value].scriptname> matches script {
             - inventory set origin:<def[Value]>[quantity=1] slot:<def[Slot]>
           }
@@ -104,7 +109,7 @@ Skill_Bar_Setup:
       }
       else {
         - define Slot 1
-        - define Stat_Config s@<player.flag[Class]>_Stat_Config
+        - define Stat_Config s@<yaml[<player.uuid>].read[General.Class]>_Stat_Config
         - foreach <def[Stat_Config].yaml_key[Default_Skill_List]> {
           - inventory set origin:<def[value]> slot:<def[Slot]>
           - define Slot <def[Slot].add[1]>

@@ -1,6 +1,6 @@
 Class_Commands:
   type: command
-  debug: false
+  debug: true
   name: Class
   usage: /Class (Choose)
   description: The various class commands.
@@ -16,12 +16,12 @@ Class_Commands:
     - queue clear
   }
   else if <context.args.size> == 1 {
-    - if <context.args.get[1]> == skills && <player.flag[Class]||Citizen> != Citizen {
+    - if <context.args.get[1]> == skills && <yaml[<player.uuid>].read[General.Class]> != Citizen {
       - inject Skill_Bar_Setup
-      - inventory open d:in@<player.flag[Class]>_Skills_Menu
+      - inventory open d:in@<yaml[<player.uuid>].read[General.Class]>_Skills_Menu
       - queue clear
     }
-    else if <player.flag[Class]> == Citizen || !<player.has_flag[Class]> {
+    else if <yaml[<player.uuid>].read[General.Class]> == Citizen {
       - narrate "<&a><&l>[Class] <&7>You currently do not have any class set!"
       - queue clear
     }
@@ -35,8 +35,8 @@ Class_Commands:
       - narrate "<&a><&l>[Class] <&7>You must be an administrator to use this command!"
       - queue clear
     }
-    - if <context.args.get[2]> == cooldown && <yaml[<player.uuid>].contains[<player.flag[Class]>.Skill_Bar.Skills]> {
-      - foreach <yaml[<player.uuid>].read[<player.flag[Class]>.Skill_Bar.Skills]> {
+    - if <context.args.get[2]> == cooldown && <yaml[<player.uuid>].contains[<yaml[<player.uuid>].read[General.Class]>.Skill_Bar.Skills]> {
+      - foreach <yaml[<player.uuid>].read[<yaml[<player.uuid>].read[General.Class]>.Skill_Bar.Skills]> {
         - define Skill <def[value].scriptname>_Cooldown
         - if <player.has_flag[<def[Skill]>]> {
           - flag player <def[Skill]>:!
@@ -52,7 +52,7 @@ Class_Commands:
       - narrate "<&a><&l>[Class] <&7>You must be an administrator to use this command!"
       - queue clear
     }
-    - if <context.args.get[2]> == cooldown && <yaml[<player.uuid>].contains[<player.flag[Class]>.Skill_Bar.Skills]> {
+    - if <context.args.get[2]> == cooldown && <yaml[<player.uuid>].contains[<yaml[<player.uuid>].read[General.Class]>.Skill_Bar.Skills]> {
       - define Player p@<context.args.get[3]>
       - if !<def[Player].is_online> {
         - narrate "<&a><&l>[Class] <&f><def[Player].name> is not online!"
@@ -95,15 +95,15 @@ Cast_Command:
 
 Class_Select_Menu:
   type: Inventory
-  debug: false
+  debug: true
   inventory: HOPPER
   title: <&6><&l>Select a class<&co>
   slots:
-  - "[i@Berserker_Icon] [] [] [] [i@Exit_Icon]"
+  - "[i@Berserker_Icon] [i@Saboteur_Icon] [] [] [i@Exit_Icon]"
 
 Class_Select_Menu_Handler:
   type: world
-  debug: false
+  debug: true
   events:
     on player clicks in Class_Select_Menu:
     - determine cancelled
@@ -111,12 +111,20 @@ Class_Select_Menu_Handler:
     - determine cancelled
     on player clicks Berserker_Icon in Class_Select_Menu:
     - inventory close
+    - yaml id:<player.uuid> set General.Class:Berserker
     - inject Skill_Bar_Setup
     - adjust <player> max_health:<s@Berserker_Stat_Config.yaml_key[Health].as_int||150>
     - adjust <player> scale_health:true
     - adjust <player> health:<player.health.max>
-    - flag player Class:Berserker
     - title "subtitle:<&6>You have become a <&c>Berserker<&6>!"
+    on player clicks Saboteur_Icon in Class_Select_Menu:
+    - inventory close
+    - yaml id:<player.uuid> set General.Class:Saboteur
+    - inject Skill_Bar_Setup
+    - adjust <player> max_health:<s@Saboteur_Stat_Config.yaml_key[Health].as_int||150>
+    - adjust <player> scale_health:true
+    - adjust <player> health:<player.health.max>
+    - title "subtitle:<&6>You have become a <&c>Saboteur<&6>!"
     on player clicks Exit_Icon in Class_Select_Menu:
     - inventory close
 
@@ -127,3 +135,11 @@ Berserker_Icon:
   display name: <&c>Berserker
   lore:
   - <&a>Click here to become a berserker!
+
+Saboteur_Icon:
+  type: item
+  debug: false
+  material: firework_charge
+  display name: <&c>Saboteur
+  lore:
+  - <&a>Click here to become a Saboteur!

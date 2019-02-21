@@ -1,0 +1,218 @@
+Saboteur_Stat_Config:
+  type: yaml data
+  Default_Mana: 0
+  Max_Mana: 20
+  Min_Mana: 0
+  Class_Resource: Heat
+  Default_Skill_List: li@i@Turret
+  Health: 220
+  Melee_Damage: 5
+  
+Saboteur_Skill_Config:
+  type: yaml data
+  ## Turret ##
+  Turret_Damage: 15
+  Turret_Range: 7
+  Turret_Cost: 0
+  Turret_Cooldown: 1
+  ## Land Mine ##
+  Land_Mine_Damage: 25
+  Land_Mine_Duration: 5
+  Land_Mine_cost: 0
+  Land_Mine_cooldown: 10
+  
+Saboteur_Skills_Menu:
+  type: Inventory
+  debug: false
+  title: <&6><&l>Saboteur Skills<&co>
+  size: 36
+  slots:
+  - "[i@Turret] [] [] [] [] [] [] [] []"
+  - "[i@Land_Mine] [] [] [] [] [] [] [] []"
+  - "[i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon] [i@Filler_Icon]"
+  - "[i@<player.inventory.slot[1].scriptname||Unassigned_Skill>[quantity=1]] [i@<player.inventory.slot[2].scriptname||Unassigned_Skill>[quantity=1]] [i@<player.inventory.slot[3].scriptname||Unassigned_Skill>[quantity=1]] [i@<player.inventory.slot[4].scriptname||Unassigned_Skill>[quantity=1]] [i@<player.inventory.slot[5].scriptname||Unassigned_Skill>[quantity=1]] [i@<player.inventory.slot[6].scriptname||Unassigned_Skill>[quantity=1]] [] [] [i@Exit_Icon]"
+
+Saboteur_Skills_Menu_Handler:
+  type: world
+  debug: false
+  events:
+    on player clicks in Saboteur_Skills_Menu:
+    - determine cancelled
+    on player drags in Saboteur_Skills_Menu:
+    - determine cancelled
+    on player clicks Turret in Saboteur_Skills_Menu:
+    - inject Selection_Process
+    on player clicks Land_Mine in Saboteur_Skills_Menu:
+    - inject Selection_Process
+    on player clicks Exit_Icon in Saboteur_Skills_Menu:
+    - inject Skill_Bar_Management
+    - inventory close
+    on player closes Saboteur_Skills_Menu:
+    - inject Skill_Bar_Management
+    
+Land_Mine:
+  type: item
+  debug: false
+  material: DAYLIGHT_DETECTOR
+  display name: <&c><&l>Land Mine
+  lore:
+  - <&a>Optional Skill
+  - <&2>Type<&co> <&a>[Reactivatable] <&6>Utility
+  - <&2>Description<&co> <&6>Throws a land mine,
+  - <&6>which can be activated to launch
+  - <&6>both yourself and enemies away.
+  - <&sp>
+
+Land_Mine_Cast:
+  type: task
+  debug: true
+  speed: 0
+  script:
+    - if !<player.has_flag[Land_Mine]> {
+        - define Multi_Cast true
+        - shoot FALLING_BLOCK,DAYLIGHT_DETECTOR origin:<player> speed:0.7 script:Land_Mine_Deployment
+    }
+    else if <player.has_flag[Land_Mine]> && <player.flag[Land_Mine]> != false {
+        - define Multi_Cast false
+        - define Message false
+        - narrate "Boom"
+        - inject Land_Mine_Removal
+    }
+    else {
+        - queue clear
+    }
+
+Land_Mine_Deployment:
+  type: task
+  debug: true
+  speed: 0
+  script:
+    - flag player Land_Mine:<def[location]> duration:<s@Saboteur_Skill_Config.yaml_key[Land_Mine_Duration].as_int.add[2]||5>s
+    - wait <s@Saboteur_Skill_Config.yaml_key[Land_Mine_Duration].as_int||5>s
+    - if !<player.has_flag[Land_Mine_Cooldown]> || !<player.is_online> {
+        - inject Land_Mine_Removal
+        - define Skill Land_Mine
+        - define Skill_Cooldown <def[Skill]>_Cooldown
+        - define Skill_Slot <player.inventory.find.scriptname[<def[Skill]>]>
+        - flag player <def[Skill_Cooldown]> duration:<Saboteur_Skill_Config.yaml_key[Land_Mine_Cooldown].as_int||10>
+        - inject Cooldown_Manager
+    }
+    
+Land_Mine_Removal:
+  type: task
+  debug: true
+  speed: 0
+  script:
+    - define Location <player.flag[Land_Mine]>
+    - modifyblock <def[Location].find.blocks[DAYLIGHT_DETECTOR].within[3].get[1]> air no_physics delayed
+    
+Turret:
+  type: item
+  debug: false
+  material: DISPENSER
+  display name: <&c><&l>Turret
+  lore:
+  - <&e>Default Skill
+  - <&2>Type<&co> <&a>[Positioned] <&6>Structure
+  - <&2>Description<&co> <&6>Constructs a turret firing
+  - <&6>at nearby enemies.
+  - <&sp>
+  
+Turret_Cast:
+  type: task
+  debug: false
+  speed: 0
+  script:
+    - define Turret_Location <player.location.cursor_on[<s@Saboteur_Skill_Config.yaml_key[Turret_Range].as_int||5>]>
+    - if <def[Turret_Location].material.is_solid> && <def[Turret_Location].above.material> == m@air && <def[Turret_Location].add[0,2,0].material> == m@air {
+        - if <server.list_notables[cuboids].contains_any[cu@<player.uuid>_Turret]> {
+            - foreach <script.list_queues.exclude[<queue>]> {
+                - if <def[value].player> == p@<player.uuid> {
+                    - queue <def[value]> clear
+                }
+            }
+            - run locally Turret_Removal
+        }
+        - note cu@<def[Turret_Location]>|<def[Turret_Location].add[0,3,0]> as:<player.uuid>_Turret
+        - run locally Turret_Creation def:<def[Turret_Location]>
+    }
+    else {
+        - queue clear
+    }
+  Turret_Creation:
+    - modifyblock <def[1].add[0,1,0]> 113 no_physics delayed
+    - playeffect <def[1].add[0,1,0].center> effect:CLOUD quantity:10 offset:0.5,-0.5,0.5
+    - wait 10t
+    - modifyblock <def[1].add[0,2,0]> 113 no_physics delayed
+    - playeffect <def[1].add[0,1,0].center> effect:CLOUD quantity:15 offset:0.5,1,0.5
+    - wait 10t
+    - modifyblock <def[1].add[0,1,0]> 33,1 no_physics delayed
+    - playeffect <def[1].add[0,1,0].center> effect:CLOUD quantity:10 offset:0.5,-0.5,0.5
+    - wait 10t
+    - modifyblock <def[1].add[0,2,0]> 23,2 no_physics delayed
+    - playeffect <def[1].add[0,1,0].center> effect:CLOUD quantity:15 offset:0.5,1,0.5
+    - wait 10t
+    - if <def[1].add[0,3,0].material> == m@air {
+        - modifyblock <def[1].add[0,3,0]> m@DIODE_BLOCK_ON no_physics delayed
+        - repeat 3 {
+            - playeffect <def[1].add[0,2,0].center> effect:REDSTONE quantity:20 offset:0.5
+            - wait 1t
+        }
+    }
+    - wait 2s
+    - run locally Turret_Active def:<def[1]>
+  Turret_Active:
+    - repeat 30 {
+        - if <player.location.distance[<def[1]>]> > 25 || !<player.is_online> {
+            - run locally Turret_Removal
+            - if <player.is_online> {
+                - narrate "<&a><&l>[Skill] <&7>Your <&f>Turret <&7>has been removed!"
+            }
+            - queue clear
+        }
+        - define Target_List <player.location.find.living_entities.within[15].exclude[p@<player.uuid>]>
+        - if <def[Target_List].size> >= 1 {
+            - repeat <def[Target_List].size> {
+            - define Target <def[Target_List].get[<def[value]>]>
+            - inject Target_Check
+                - if <def[Target_Check]> == true {
+                    - define Turret_Direction <def[1].add[0,2,0].direction[<def[Target].location>].yaw>
+                    - if <def[Turret_Direction]> > 315 || <def[Turret_Direction]> < 45 {
+                        - modifyblock <def[1].add[0,2,0]> 23,3 no_physics delayed
+                        - wait 10t
+                        - playeffect <def[1].add[0,2,1].center> effect:EXPLOSION_NORMAL quantity:5 offset:0.3
+                        - shoot ARROW origin:<def[1].add[0,2,1].center> destination:<def[Target].location.center> speed:3
+                    }
+                    else if <def[Turret_Direction]> > 45 && <def[Turret_Direction]> < 135 {
+                        - modifyblock <def[1].add[0,2,0]> 23,4 no_physics delayed
+                        - wait 10t
+                        - playeffect <def[1].add[-1,2,0].center> effect:EXPLOSION_NORMAL quantity:5 offset:0.3
+                        - shoot ARROW origin:<def[1].add[-1,2,0].center> destination:<def[Target].location.center> speed:3
+                    }
+                    else if <def[Turret_Direction]> > 135 && <def[Turret_Direction]> < 225 {
+                        - modifyblock <def[1].add[0,2,0]> 23,2 no_physics delayed
+                        - wait 10t
+                        - playeffect <def[1].add[0,2,-1].center> effect:EXPLOSION_NORMAL quantity:5 offset:0.3
+                        - shoot ARROW origin:<def[1].add[0,2,-1].center> destination:<def[Target].location.center> speed:3
+                    }
+                    else if <def[Turret_Direction]> > 225 && <def[Turret_Direction]> < 315 {
+                        - modifyblock <def[1].add[0,2,0]> 23,5 no_physics delayed
+                        - wait 10t
+                        - playeffect <def[1].add[1,2,0].center> effect:EXPLOSION_NORMAL quantity:5 offset:0.3
+                        - shoot ARROW origin:<def[1].add[1,2,0].center> destination:<def[Target].location.center> speed:3
+                    }
+                }
+            }
+        }
+        - wait 2s
+    }
+    - run locally Turret_Removal
+    - narrate "<&a><&l>[Skill] <&7>Your <&f>Turret <&7>has expired!"
+  Turret_Removal:
+    - define Turret_Location cu@<player.uuid>_Turret
+    - foreach <def[Turret_Location].blocks[113|33|23|m@DIODE_BLOCK_ON]> {
+        - modifyblock <def[value]> air no_physics delayed
+    }
+    - note remove as:cu@<player.uuid>_Turret
+
+  

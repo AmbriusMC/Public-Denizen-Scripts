@@ -70,12 +70,12 @@ Berserker_Skill_Config:
   Smash_Cost: 6
 
 
-Berserker_World_Handler:
+Berserker_Ressource_Handler:
   type: world
   debug: false
   events:
     on player damages entity:
-    - if <player.flag[Class]> == Berserker && !<player.has_flag[Stun_Effect]> {
+    - if <yaml[<player.uuid>].read[General.Class]> == Berserker && !<player.has_flag[Stun_Effect]> {
       - if <context.cause> == entity_attack {
         - define Mana <yaml[<player.uuid>].read[General.Mana].as_int>
         - if <def[Mana].add[<s@Berserker_Skill_Config.yaml_key[Inner_Rage_Resource].as_int||2>]> >= <s@Berserker_Skill_Config.yaml_key[Max_Mana].as_int||20> {
@@ -137,6 +137,7 @@ Berserker_Skills_Menu_Handler:
     on player clicks Smash in Berserker_Skills_Menu:
     - inject Selection_Process
     on player clicks Exit_Icon in Berserker_Skills_Menu:
+    - inject Skill_Bar_Management
     - inventory close
     on player closes Berserker_Skills_Menu:
     - inject Skill_Bar_Management
@@ -201,7 +202,7 @@ Smash_Effect:
       - foreach <def[Location].find.living_entities.within[<s@Berserker_Skill_Config.yaml_key[Smash_Range].as_decimal||2>].exclude[<player>]> {
         - define Target <def[Value]>
         - inject Target_Check
-        - if <def[Target_Check]> == True {
+        - if <def[Target_Check]> == true {
           - run locally Smash_Damage_Effect def:<def[Value]>
         }
       }
@@ -258,7 +259,7 @@ Whirlwind_Cast:
       - foreach <player.location.find.living_entities.within[<s@Berserker_Skill_Config.yaml_key[Whirlwind_Range].as_int||4>].exclude[<player>]> {
         - define Target <def[Value]>
         - inject Target_Check
-        - if <def[Target_Check]> == True {
+        - if <def[Target_Check]> == true {
           - run locally Whirlwind_Damage_Effect def:<def[Target]>|<def[Whirlwind_Damage]>
         }
       }
@@ -273,7 +274,7 @@ Whirlwind_Cast:
       - foreach <player.location.find.living_entities.within[<s@Berserker_Skill_Config.yaml_key[Whirlwind_Range].as_int||4>].exclude[<player>]> {
         - define Target <def[Value]>
         - inject Target_Check
-        - if <def[Target_Check]> == True {
+        - if <def[Target_Check]> == true {
           - run locally Whirlwind_Damage_Effect def:<def[Target]>|<def[Whirlwind_Damage]>
         }
       }
@@ -289,7 +290,7 @@ Whirlwind_Cast:
       - foreach <player.location.find.living_entities.within[<s@Berserker_Skill_Config.yaml_key[Whirlwind_Range].as_int||4>].exclude[<player>]> {
         - define Target <def[Value]>
         - inject Target_Check
-        - if <def[Target_Check]> == True {
+        - if <def[Target_Check]> == true {
           - run locally Whirlwind_Damage_Effect def:<def[Target]>|<def[Whirlwind_Damage]>
         }
       }
@@ -340,11 +341,11 @@ Hamstring_Effect:
   debug: false
   events:
     on player damages entity:
-    - if <context.damager.flag[Class]> == Berserker && <context.damager.has_flag[Hamstring_Effect]> {
+    - if <context.damager.has_flag[Hamstring_Effect]> {
       - flag <context.damager> Hamstring_Effect:!
       - define Target <context.entity>
       - inject Target_Check
-      - if <def[Target_Check]> == True {
+      - if <def[Target_Check]> == true {
         - run Hamstring_Damage_Effect def:<def[Target]>
       }
     }
@@ -443,7 +444,7 @@ Axe_Throw_Effect:
       - queue clear
     }
     - inject Target_Check
-    - if <def[Target_Check]> == True {
+    - if <def[Target_Check]> == true {
       - run locally Axe_Throw_Damage_Effect def:<def[Target]>
     }
   Axe_Throw_Damage_Effect:
@@ -501,7 +502,7 @@ Charge_Effect:
     - foreach <player.location.find.living_entities.within[<s@Berserker_Skill_Config.yaml_key[Charge_Radius].as_decimal||2>].exclude[<player>]> {
       - define Target <def[Value]>
       - inject Target_Check
-      - if <def[Target_Check]> == True {
+      - if <def[Target_Check]> == true {
         - run locally Charge_Damage_Effect def:<def[Target]>
       }
     }
@@ -554,13 +555,13 @@ Overpower_Cast:
       - if <def[Target].entity_type> == ARMOR_STAND {
         - define Target <def[Target].location.find.living_entities.within[1].exclude[<player>|<def[Target]>].get[1]>
         - inject Target_Check
-        - if <def[Target_Check]> == True {
+        - if <def[Target_Check]> == true {
           - run locally Overpower_Damage_Effect def:<def[Target]>
         }
       }
       else {
         - inject Target_Check
-        - if <def[Target_Check]> == True {
+        - if <def[Target_Check]> == true {
           - run locally Overpower_Damage_Effect def:<def[Target]>
         }
       }
@@ -632,7 +633,7 @@ Cleave_Cast:
       - if <player.location.facing[<def[Value]>]> {
         - define Target <def[Value]>
         - inject Target_Check
-        - if <def[Target_Check]> == True {
+        - if <def[Target_Check]> == true {
           - run locally Cleave_Damage_Effect def:<def[Target]>
         }
       }
